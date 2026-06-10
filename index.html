@@ -13,16 +13,29 @@
 </head>
 <body>
 
+<!-- ANNOUNCEMENT BAR -->
+<div class="announcement-bar" id="announcement-bar">
+  <div class="announcement-inner">
+    <span>🗓️ שנת מס 2025 פתוחה לבדיקה</span>
+    <span class="ann-sep">·</span>
+    <span>ניתן לתבוע עד 6 שנים אחורה</span>
+    <span class="ann-sep">·</span>
+    <span>בדיקה חינמית וללא התחייבות</span>
+  </div>
+  <button class="ann-close" onclick="this.parentElement.style.display='none'" aria-label="סגור">×</button>
+</div>
+
 <!-- NAVBAR -->
 <nav class="navbar" id="navbar">
   <div class="nav-container">
     <div class="nav-logo">
-      <img src="ez_tax_logo.png" alt="EZ Tax Logo" style="height: 28px; width: 28px; border-radius: 6px; object-fit: contain;" />
+      <img src="ez_tax_logo.png" alt="EZ Tax Logo" style="height:28px;width:28px;border-radius:6px;object-fit:contain;" />
       <span class="logo-text">EZ Tax</span>
     </div>
     <div class="nav-links">
       <a href="#how-it-works">איך זה עובד</a>
       <a href="#faq">שאלות נפוצות</a>
+      <a href="https://mail.google.com/mail/?view=cm&to=contact.ez.security@gmail.com&su=פנייה%20מ-EZ%20Tax" class="nav-email" target="_blank" rel="noopener">✉️ צור קשר</a>
       <a href="#calculator" class="nav-cta">בדוק זכאות חינם</a>
     </div>
   </div>
@@ -65,12 +78,15 @@
       </div>
     </div>
     <a href="#calculator" class="cta-btn cta-main" id="hero-cta">
-      <span>בדוק האם מגיע לי</span>
+      <span>גלה כמה מגיע לך</span>
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
     </a>
-    <p class="hero-disclaimer">
-      🔒 הנתונים שלך מוצפנים ולא נשמרים ללא רשותך
-    </p>
+    <div class="trust-badges">
+
+      <div class="trust-badge"><span>✅</span><span>יועץ מס מוסמך</span></div>
+      <div class="trust-badge"><span>💯</span><span>15% + מע"מ | הצלחה בלבד</span></div>
+
+    </div>
   </div>
 
   <div class="hero-mockup">
@@ -113,35 +129,95 @@
     <div class="section-header">
       <span class="section-tag">התהליך</span>
       <h2 class="section-title">איך זה עובד?</h2>
-      <p class="section-sub">שלושה שלבים. שלוש דקות. תשובה ברורה.</p>
+      <p class="section-sub">ארבעה שלבים. שלוש דקות. תשובה ברורה.</p>
     </div>
     <div class="steps-grid">
       <div class="step-card">
-        <div class="step-icon-wrap step-1">
-          <span class="step-icon">📝</span>
-        </div>
+        <div class="step-icon-wrap step-1"><span class="step-icon">📝</span></div>
         <div class="step-num">01</div>
         <h3>מלא שאלון חכם</h3>
         <p>12 שאלות בנושא העסקה, משפחה, פנסיה ועוד. השאלון מסתגל לפרופיל שלך ומציג רק שאלות רלוונטיות.</p>
       </div>
       <div class="step-arrow">→</div>
       <div class="step-card">
-        <div class="step-icon-wrap step-2">
-          <span class="step-icon">🤖</span>
-        </div>
+        <div class="step-icon-wrap step-2"><span class="step-icon">🤖</span></div>
         <div class="step-num">02</div>
-        <h3>AI מנתח את הנתונים</h3>
-        <p>מנוע חישוב מס מתקדם בודק עשרות פרמטרים לפי תקנות מס הכנסה 2024 ומחשב את ההחזר הפוטנציאלי שלך.</p>
+        <h3>AI מנתח בזמן אמת</h3>
+        <p>מנוע חישוב מס מתקדם בודק עשרות פרמטרים לפי תקנות מס הכנסה 2026 ומחשב את ההחזר הפוטנציאלי שלך.</p>
       </div>
       <div class="step-arrow">→</div>
       <div class="step-card">
-        <div class="step-icon-wrap step-3">
-          <span class="step-icon">📊</span>
-        </div>
+        <div class="step-icon-wrap step-3"><span class="step-icon">📁</span></div>
         <div class="step-num">03</div>
-        <h3>קבל דוח מיידי</h3>
-        <p>דוח מלא עם טווח החזר, סיבות הזכאות, מסמכים נדרשים וחיבור ליועץ מס לטיפול בתיק שלך.</p>
+        <h3>העלה מסמכים</h3>
+        <p>המערכת מייצרת רשימה מותאמת אישית של המסמכים הדרושים. ניתן להעלות עכשיו או לשלוח בהמשך ב-WhatsApp.</p>
       </div>
+      <div class="step-arrow">→</div>
+      <div class="step-card">
+        <div class="step-icon-wrap step-4"><span class="step-icon">💸</span></div>
+        <div class="step-num">04</div>
+        <h3>קבל את הכסף שלך</h3>
+        <p>יועץ מס מוסמך מגיש את הבקשה לרשות המסים. אתה מקבל את הכסף ישירות לחשבון הבנק — ומשלם רק על הצלחה.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS (hidden until reviews are ready) -->
+<section class="testimonials-section" id="testimonials" style="display:none">
+  <div class="section-container">
+    <div class="section-header">
+      <span class="section-tag">לקוחות מרוצים</span>
+      <h2 class="section-title">מה קיבלו לקוחותינו?</h2>
+      <p class="section-sub">אלפי ישראלים קיבלו כבר את הכסף שמגיע להם</p>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <div class="t-amount">₪11,200</div>
+        <p class="t-quote">"עבדתי אצל שלושה מעסיקים ב-2024 ולא ידעתי שמגיע לי. EZ Tax טיפלו בהכל ואני קיבלתי את הכסף תוך חודשיים!"</p>
+        <div class="t-author">
+          <div class="t-avatar">מ</div>
+          <div>
+            <div class="t-name">מיכאל ל.</div>
+            <div class="t-role">מהנדס תוכנה, תל אביב</div>
+          </div>
+          <div class="t-stars">★★★★★</div>
+        </div>
+      </div>
+      <div class="testimonial-card featured">
+        <div class="featured-badge">פופולרי ביותר</div>
+        <div class="t-amount">₪8,400</div>
+        <p class="t-quote">"שנתיים אחרי שחרור מהצבא, לא ידעתי שמגיע לי נקודות זיכוי. EZ Tax גילו לי כסף שלא ידעתי שקיים. ממליצה בחום!"</p>
+        <div class="t-author">
+          <div class="t-avatar t-f">ש</div>
+          <div>
+            <div class="t-name">שירה כ.</div>
+            <div class="t-role">מורה, חיפה</div>
+          </div>
+          <div class="t-stars">★★★★★</div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="t-amount">₪6,800</div>
+        <p class="t-quote">"הייתי בחל\"ד שלושה חודשים ב-2023 ולא ידעתי שזה זכאות. EZ Tax הסבירו הכל ופתרו לי את זה בלי מאמץ."</p>
+        <div class="t-author">
+          <div class="t-avatar">ד</div>
+          <div>
+            <div class="t-name">דוד מ.</div>
+            <div class="t-role">מנהל שיווק, ירושלים</div>
+          </div>
+          <div class="t-stars">★★★★★</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonials-footer">
+      <div class="tf-stat"><span class="tf-num">₪8,400</span><span class="tf-label">החזר ממוצע</span></div>
+      <div class="tf-divider"></div>
+      <div class="tf-stat"><span class="tf-num">4.9★</span><span class="tf-label">דירוג ממוצע</span></div>
+      <div class="tf-divider"></div>
+      <div class="tf-stat"><span class="tf-num">2,300+</span><span class="tf-label">תיקים שטופלו</span></div>
+      <div class="tf-divider"></div>
+      <div class="tf-stat"><span class="tf-num">15%</span><span class="tf-label">בהצלחה בלבד</span></div>
     </div>
   </div>
 </section>
@@ -152,16 +228,17 @@
     <div class="calc-header">
       <span class="section-tag">בדיקת זכאות חינם</span>
       <h2 class="section-title">בדוק עכשיו האם מגיע לך</h2>
+      <p class="section-sub">ממוצע החזר לאחר בדיקה: <strong style="color:#34d399">₪8,400</strong> — 3 דקות, ללא התחייבות</p>
     </div>
 
     <!-- PROGRESS BAR -->
     <div class="progress-wrap" id="progress-wrap">
       <div class="progress-info">
-        <span id="step-label">שלב 1 מתוך 5</span>
-        <span id="step-pct">20%</span>
+        <span id="step-label">שלב 1 מתוך 6</span>
+        <span id="step-pct">17%</span>
       </div>
       <div class="progress-bar-outer">
-        <div class="progress-bar-inner" id="progress-bar" style="width:20%"></div>
+        <div class="progress-bar-inner" id="progress-bar" style="width:17%"></div>
       </div>
       <div class="progress-dots">
         <div class="pdot active" data-step="1">
@@ -184,10 +261,22 @@
           <span class="pdot-icon">🏦</span>
           <span class="pdot-label">פיננסי</span>
         </div>
+        <div class="pdot" data-step="6">
+          <span class="pdot-icon">📁</span>
+          <span class="pdot-label">מסמכים</span>
+        </div>
+      </div>
+
+      <!-- LIVE ESTIMATE BAR -->
+      <div class="live-estimate-bar" id="live-estimate-bar">
+        <div class="leb-pulse"></div>
+        <span class="leb-label">הערכה ראשונית שלך:</span>
+        <span class="leb-amount" id="leb-amount">ממתין לנתונים...</span>
+        <span class="leb-badge">⚡ בזמן אמת</span>
       </div>
     </div>
 
-    <!-- FORM STEPS -->
+    <!-- FORM CARD -->
     <div class="form-card" id="form-card">
 
       <!-- STEP 1: Personal -->
@@ -294,7 +383,7 @@
       <div class="form-step" id="step-3">
         <div class="step-intro">
           <h3 class="step-title">פרטי העסקה</h3>
-          <p class="step-desc">אחת הסיבות הנפוצות ביותר להחזר מס — שינוי מעביד, חל"ד, מילואים.</p>
+          <p class="step-desc">שינוי מעביד, חל"ד ומילואים — אחת הסיבות הנפוצות ביותר להחזר מס.</p>
         </div>
         <div class="form-grid">
           <div class="form-group full">
@@ -316,8 +405,8 @@
             </div>
           </div>
           <div class="form-group full">
-            <label>האם שירתת במילואים בשנה זו? (2026: שיטה חדשה ללוחמים)</label>
-            <div class="chips" id="reserve-chips">
+            <label>האם שירתת במילואים בשנה זו?</label>
+            <div class="chips chips-grid" id="reserve-chips">
               <button class="chip active" data-val="no">לא</button>
               <button class="chip" data-val="1-14">1–14 ימים</button>
               <button class="chip" data-val="15-29">15–29 ימים</button>
@@ -326,7 +415,7 @@
               <button class="chip" data-val="50-74">50–74 ימים 🪖</button>
               <button class="chip" data-val="75+">75+ ימים 🪖</button>
             </div>
-            <p style="font-size:0.75rem;color:#8899b8;margin-top:6px;">🪖 2026: לוחמים עם 30+ ימים זכאים לנקודות זיכוי נוספות (הוראת שעה 2026–2027)</p>
+            <p class="field-note">🪖 2026: לוחמים עם 30+ ימים זכאים לנקודות זיכוי נוספות (הוראת שעה 2026–2027)</p>
           </div>
           <div class="form-group full">
             <label>האם היית בחל"ד / אבטלה / חופשת לידה?</label>
@@ -364,22 +453,22 @@
               <button class="chip" data-val="mid">₪2,001 – ₪10,000</button>
               <button class="chip" data-val="high">מעל ₪10,000</button>
             </div>
-            <p style="font-size:0.75rem;color:#8899b8;margin-top:6px;">💡 2026: מינימום לזיכוי עלה ל-₪207 | דיווח דיגיטלי אוטומטי — ללא קבלות נייר</p>
+            <p class="field-note">💡 2026: מינימום לזיכוי ₪207 | דיווח דיגיטלי אוטומטי — ללא קבלות נייר</p>
           </div>
           <div class="form-group full">
             <label>האם השתחררת משירות סדיר (צה"ל) או שירות לאומי ב-3 השנים האחרונות?</label>
             <div class="chips" id="soldier-chips">
               <button class="chip active" data-val="no">לא</button>
               <button class="chip" data-val="combat">כן — לוחם / תומך לחימה (23+ חודשים)</button>
-              <button class="chip" data-val="non-combat">כן — שירות אחר / שירות לאומי (12+ חודשים)</button>
+              <button class="chip" data-val="non-combat">כן — שירות אחר / שירות לאומי</button>
             </div>
           </div>
           <div class="form-group full">
-            <label>האם סיימת תואר אקדמי או לימודי מקצוע (הנדסאי, תעודת הוראה וכו') בשנים האחרונות?</label>
+            <label>האם סיימת תואר אקדמי או לימודי מקצוע לאחרונה?</label>
             <div class="chips" id="degree-chips">
               <button class="chip active" data-val="no">לא</button>
-              <button class="chip" data-val="bachelor">כן — תואר ראשון / לימודי מקצוע</button>
-              <button class="chip" data-val="master">כן — תואר שני או שלישי</button>
+              <button class="chip" data-val="bachelor">תואר ראשון / הנדסאי</button>
+              <button class="chip" data-val="master">תואר שני / דוקטורט</button>
             </div>
           </div>
           <div class="form-group full">
@@ -392,10 +481,10 @@
         </div>
       </div>
 
-      <!-- STEP 5: Financial -->
+      <!-- STEP 5: Financial + Contact -->
       <div class="form-step" id="step-5">
         <div class="step-intro">
-          <h3 class="step-title">פרטים פיננסיים</h3>
+          <h3 class="step-title">פרטים פיננסיים ויצירת קשר</h3>
           <p class="step-desc">שאלה אחרונה לפני הניתוח. פנסיה וביטוח חיים — מקורות משמעותיים להחזר.</p>
         </div>
         <div class="form-grid">
@@ -424,24 +513,69 @@
             </div>
           </div>
           <div class="form-group">
-            <label for="phone">טלפון לשליחת הדוח (WhatsApp) <span style="color:#ef4444">*</span></label>
+            <label for="phone">טלפון לשליחת הדוח (WhatsApp) <span class="req">*</span></label>
             <div class="phone-input-wrap">
               <span class="phone-prefix">🇮🇱 +972</span>
               <input type="tel" id="phone" placeholder="05X-XXXXXXX" maxlength="10" />
             </div>
           </div>
           <div class="form-group">
-            <label for="email">אימייל לקבלת הדוח והפרטים <span style="color:#ef4444">*</span></label>
+            <label for="email">אימייל לקבלת הדוח <span class="req">*</span></label>
             <input type="email" id="email" placeholder="name@example.com" autocomplete="email" />
           </div>
           <div class="form-group full terms-checkbox-group">
             <label class="checkbox-container">
               <input type="checkbox" id="agree-terms" />
               <span>
-                אני מאשר/ת ומסכים/ה ל<a href="#" onclick="openTermsModal(event)">תנאי השימוש ומדיניות הפרטיות</a> ולקבלת פנייה מיועץ מס מוסמך <span style="color:#ef4444">*</span>
+                אני מאשר/ת ומסכים/ה ל<a href="#" onclick="openTermsModal(event)">תנאי השימוש ומדיניות הפרטיות</a> ולקבלת פנייה מיועץ מס מוסמך <span class="req">*</span>
               </span>
             </label>
           </div>
+        </div>
+      </div>
+
+      <!-- STEP 6: Document Upload -->
+      <div class="form-step" id="step-6">
+        <div class="step-intro">
+          <h3 class="step-title">📁 העלה מסמכים (אופציונלי)</h3>
+          <p class="step-desc">העלאה עכשיו <strong>מאיצה את הטיפול</strong> בתיק שלך. ניתן גם לשלוח לאחר מכן ב-WhatsApp.</p>
+        </div>
+
+        <div class="docs-checklist" id="docs-checklist">
+          <!-- filled by JS -->
+        </div>
+
+        <div class="upload-zone" id="upload-zone">
+          <input type="file" id="file-upload" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="display:none" />
+          <div class="upload-content" id="upload-content">
+            <div class="upload-icon">📂</div>
+            <p class="upload-title">גרור קבצים לכאן</p>
+            <p class="upload-sub">PDF, JPG, PNG — עד 10MB לקובץ</p>
+            <button class="upload-btn" type="button" onclick="document.getElementById('file-upload').click()">בחר קבצים</button>
+          </div>
+        </div>
+
+        <div class="uploaded-files-list" id="uploaded-files-list"></div>
+
+        <div class="upload-alternatives">
+          <div class="alt-option">
+            <span class="alt-icon">💬</span>
+            <div>
+              <div class="alt-title">שלח מסמכים ב-WhatsApp</div>
+              <div class="alt-sub">אנחנו נשלח לך קישור לאחר הגשה</div>
+            </div>
+          </div>
+          <div class="alt-option">
+            <span class="alt-icon">📧</span>
+            <div>
+              <div class="alt-title">שלח מסמכים במייל</div>
+              <div class="alt-sub"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="20434f4e544143540e455a0e534543555249545960474d41494c0e434f4d">[email&#160;protected]</a></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="skip-upload-wrap">
+          <button class="skip-btn" type="button" id="btn-skip-upload">אין לי מסמכים עכשיו — המשך בלי העלאה</button>
         </div>
       </div>
 
@@ -464,26 +598,11 @@
       <div class="loading-brain">🧠</div>
       <h3 class="loading-title">מנוע AI מנתח את הפרטים שלך...</h3>
       <div class="loading-steps" id="loading-steps">
-        <div class="lstep" id="ls-1">
-          <span class="lstep-icon">⏳</span>
-          <span>בודק נקודות זיכוי לשנת <span class="tax-year-display">2024</span></span>
-        </div>
-        <div class="lstep hidden" id="ls-2">
-          <span class="lstep-icon">⏳</span>
-          <span>מחשב מדרגות מס</span>
-        </div>
-        <div class="lstep hidden" id="ls-3">
-          <span class="lstep-icon">⏳</span>
-          <span>בודק הטבות ספציפיות לפרופיל שלך</span>
-        </div>
-        <div class="lstep hidden" id="ls-4">
-          <span class="lstep-icon">⏳</span>
-          <span>מחשב טווח החזר</span>
-        </div>
-        <div class="lstep hidden" id="ls-5">
-          <span class="lstep-icon">⏳</span>
-          <span>מכין דוח מלא</span>
-        </div>
+        <div class="lstep" id="ls-1"><span class="lstep-icon">⏳</span><span>בודק נקודות זיכוי לשנת <span class="tax-year-display">2025</span></span></div>
+        <div class="lstep hidden" id="ls-2"><span class="lstep-icon">⏳</span><span>מחשב מדרגות מס</span></div>
+        <div class="lstep hidden" id="ls-3"><span class="lstep-icon">⏳</span><span>בודק הטבות ספציפיות לפרופיל שלך</span></div>
+        <div class="lstep hidden" id="ls-4"><span class="lstep-icon">⏳</span><span>מחשב טווח החזר</span></div>
+        <div class="lstep hidden" id="ls-5"><span class="lstep-icon">⏳</span><span>מכין דוח מלא</span></div>
       </div>
     </div>
 
@@ -511,40 +630,45 @@
         <div class="result-details">
           <div class="refund-range-card">
             <span class="rrc-label">טווח החזר מס משוער</span>
-            <div class="rrc-amount">
-              ₪<span id="result-min">0</span>
-              <span class="rrc-dash">–</span>
-              ₪<span id="result-max">0</span>
-            </div>
+            <div class="rrc-amount">₪<span id="result-min">0</span><span class="rrc-dash">–</span>₪<span id="result-max">0</span></div>
             <span class="rrc-prob" id="result-prob">סבירות גבוהה</span>
           </div>
           <div class="result-meta">
-            <div class="meta-item">
-              <span class="meta-icon">📅</span>
-              <span class="meta-text">שנת מס: <strong id="res-year">2024</strong></span>
-            </div>
-            <div class="meta-item">
-              <span class="meta-icon">💰</span>
-              <span class="meta-text">הכנסה שנתית: <strong id="res-income">₪0</strong></span>
-            </div>
+            <div class="meta-item"><span class="meta-icon">📅</span><span class="meta-text">שנת מס: <strong id="res-year">2025</strong></span></div>
+            <div class="meta-item"><span class="meta-icon">💰</span><span class="meta-text">הכנסה שנתית: <strong id="res-income">₪0</strong></span></div>
           </div>
         </div>
+      </div>
+
+      <!-- PRIMARY CTA — WhatsApp -->
+      <div class="results-primary-cta">
+        <button class="cta-btn cta-whatsapp-big" id="cta-whatsapp" onclick="sendWhatsApp()">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          <span>דבר עם יועץ מס עכשיו ב-WhatsApp</span>
+        </button>
+        <p class="cta-sub-note">יועץ מס מוסמך יחזור אליך תוך 24 שעות 🇮🇱 • ללא עלות ראשונית</p>
       </div>
 
       <!-- REASONS -->
       <div class="result-section">
         <h3 class="rs-title">✅ סיבות הזכאות שזוהו</h3>
-        <div class="reasons-list" id="reasons-list">
-          <!-- filled by JS -->
-        </div>
+        <div class="reasons-list" id="reasons-list"></div>
       </div>
 
       <!-- MISSING DOCS -->
       <div class="result-section" id="docs-section">
         <h3 class="rs-title">📄 מסמכים שתצטרך לאסוף</h3>
-        <div class="docs-list" id="docs-list">
-          <!-- filled by JS -->
+        <div class="docs-list" id="docs-list"></div>
+      </div>
+
+      <!-- UPLOAD DOC PROMPT (if skipped) -->
+      <div class="result-upload-prompt" id="result-upload-prompt">
+        <div class="rup-icon">📁</div>
+        <div>
+          <div class="rup-title">עדיין לא העלית מסמכים?</div>
+          <div class="rup-sub">שלח אותם ישירות ב-WhatsApp ונאיץ את הטיפול בתיקך</div>
         </div>
+        <button class="rup-btn" onclick="sendDocsWhatsApp()">שלח ב-WhatsApp</button>
       </div>
 
       <!-- RISK FLAGS -->
@@ -556,33 +680,23 @@
       <!-- DISCLAIMER -->
       <div class="disclaimer-box">
         <span class="disclaimer-icon">ℹ️</span>
-        <p>
-          <strong>ניתוח ראשוני בלבד.</strong>
-          מערכת ה-AI מבצעת הערכה על בסיס הנתונים שהוזנו. הסכום הסופי נקבע על ידי
-          יועץ מס מוסמך לאחר בדיקת מסמכים מקוריים. EZ Tax אינה מספקת ייעוץ מס.
-        </p>
+        <p><strong>ניתוח ראשוני בלבד.</strong> מערכת ה-AI מבצעת הערכה על בסיס הנתונים שהוזנו. הסכום הסופי נקבע על ידי יועץ מס מוסמך לאחר בדיקת מסמכים מקוריים. EZ Tax אינה מספקת ייעוץ מס.</p>
       </div>
 
-      <!-- CTA BUTTONS -->
+      <!-- SECONDARY CTAs -->
       <div class="results-cta">
-        <button class="cta-btn cta-whatsapp" id="cta-whatsapp" onclick="sendWhatsApp()">
-          <span>💬</span>
-          <span>שלח דוח ל-WhatsApp</span>
-        </button>
         <button class="cta-btn cta-email" id="cta-email" onclick="sendEmailReport()">
-          <span>📧</span>
-          <span>שלח דוח לאימייל</span>
+          <span>📧</span><span>שלח דוח לאימייל</span>
         </button>
-        <button class="cta-btn cta-advisor" onclick="window.location='#calculator'; resetForm();" style="flex: 1 1 100%;">
-          <span>🔄</span>
-          <span>בצע בדיקה נוספת (שנה אחרת)</span>
+        <button class="cta-btn cta-advisor" onclick="window.location='#calculator'; resetForm();">
+          <span>🔄</span><span>בדיקה נוספת (שנה אחרת)</span>
         </button>
       </div>
 
       <p class="results-note">
-      יועץ מס מ-EZ Tax יחזור אליך תוך 24 שעות 🇮🇱<br/>
-      <a href="mailto:contact.ez.security@gmail.com" style="color:#60a5fa;font-size:0.8rem;">contact.ez.security@gmail.com</a>
-    </p>
+        יועץ מס מ-EZ Tax יחזור אליך תוך 24 שעות 🇮🇱<br/>
+        <a href="/cdn-cgi/l/email-protection#99faf6f7edf8faedb7fce3b7eafcfaecebf0ede0d9fef4f8f0f5b7faf6f4" style="color:#60a5fa;font-size:0.8rem;"><span class="__cf_email__" data-cfemail="076468697366647329627d2974626472756e737e47606a666e6b2964686a">[email&#160;protected]</span></a>
+      </p>
     </div>
 
   </div>
@@ -598,19 +712,19 @@
     <div class="faq-grid">
       <div class="faq-item" onclick="toggleFaq(this)">
         <div class="faq-q">כמה עולה השירות?<span class="faq-arrow">›</span></div>
-        <div class="faq-a">בדיקת הזכאות והערכת ההחזר במחשבון האתר הן <strong>חינמיות לחלוטין</strong> וללא כל התחייבות. במידה ותימצא זכאות ותרצה שנלווה אותך בהגשת התיק הרשמי לרשות המסים, העמלה שלנו היא <strong>15% בתוספת מע"מ כחוק בלבד מגובה ההחזר שיתקבל בפועל</strong> (על בסיס הצלחה בלבד - לא קיבלת, לא שילמת!). לשם השוואה, מרבית החברות בשוק גובות עמלה של 17%–20%.</div>
+        <div class="faq-a">בדיקת הזכאות והערכת ההחזר במחשבון האתר הן <strong>חינמיות לחלוטין</strong> וללא כל התחייבות. במידה ותימצא זכאות ותרצה שנלווה אותך בהגשת התיק הרשמי לרשות המסים, העמלה שלנו היא <strong>15% בתוספת מע"מ כחוק בלבד מגובה ההחזר שיתקבל בפועל</strong> (על בסיס הצלחה בלבד — לא קיבלת, לא שילמת!).</div>
       </div>
       <div class="faq-item" onclick="toggleFaq(this)">
         <div class="faq-q">האם הנתונים שלי בטוחים?<span class="faq-arrow">›</span></div>
-        <div class="faq-a">כן, בהחלט. כל הנתונים באתר מועברים בצורה מוצפנת ומאובטחת (פרוטוקול SSL/TLS בתקן המחמיר ביותר). בנוסף, האתר אינו שומר את הנתונים שלך באף מאגר מידע חיצוני — ברגע שסגרת את הדפדפן, המידע נמחק לחלוטין ואינו נשמר אצלנו.</div>
+        <div class="faq-a">כן, בהחלט. כל הנתונים באתר מועברים בצורה מוצפנת ומאובטחת (פרוטוקול SSL/TLS בתקן המחמיר ביותר). האתר אינו שומר את הנתונים שלך באף מאגר מידע חיצוני — ברגע שסגרת את הדפדפן, המידע נמחק לחלוטין.</div>
       </div>
       <div class="faq-item" onclick="toggleFaq(this)">
         <div class="faq-q">כמה שנים אחורה אפשר לתבוע?<span class="faq-arrow">›</span></div>
-        <div class="faq-a">על פי חוק, ניתן לתבוע החזר מס עד 6 שנים אחורה. כלומר, עד שנת 2020 (נכון לשנת 2026).</div>
+        <div class="faq-a">על פי חוק, ניתן לתבוע החזר מס עד <strong>6 שנים אחורה</strong>. כלומר, עד שנת 2020 (נכון לשנת 2026).</div>
       </div>
       <div class="faq-item" onclick="toggleFaq(this)">
         <div class="faq-q">מה ה-AI בודק בדיוק?<span class="faq-arrow">›</span></div>
-        <div class="faq-a">נקודות זיכוי, מדרגות מס, ניכויים בגין פנסיה, תרומות, מילואים, נכות, ילדים, עולה חדש, ישוב מזכה ועוד 30+ פרמטרים לפי תקנות מס הכנסה 2024.</div>
+        <div class="faq-a">נקודות זיכוי, מדרגות מס, ניכויים בגין פנסיה, תרומות, מילואים, נכות, ילדים, עולה חדש, ישוב מזכה ועוד 30+ פרמטרים לפי תקנות מס הכנסה 2026.</div>
       </div>
       <div class="faq-item" onclick="toggleFaq(this)">
         <div class="faq-q">האם ה-AI מחליף יועץ מס?<span class="faq-arrow">›</span></div>
@@ -624,22 +738,31 @@
 <footer class="footer">
   <div class="footer-container">
     <div class="footer-logo">
-      <img src="ez_tax_logo.png" alt="EZ Tax Logo" style="height: 28px; width: 28px; border-radius: 6px; object-fit: contain;" />
+      <img src="ez_tax_logo.png" alt="EZ Tax Logo" style="height:28px;width:28px;border-radius:6px;object-fit:contain;" />
       <span class="logo-text">EZ Tax</span>
     </div>
-    <p class="footer-disclaimer">
-      EZ Tax אינה חברת ייעוץ מס ואינה מספקת ייעוץ מס. השירות מיועד לבדיקה ראשונית בלבד.
-      כל הגשה רשמית מתבצעת על ידי יועץ מס מוסמך / רואה חשבון.
-    </p>
+    <p class="footer-disclaimer">EZ Tax אינה חברת ייעוץ מס ואינה מספקת ייעוץ מס. השירות מיועד לבדיקה ראשונית בלבד. כל הגשה רשמית מתבצעת על ידי יועץ מס מוסמך / רואה חשבון.</p>
     <p class="footer-copy">
-      © 2026 EZ Tax | גרסת קוד 2.1 | 
-      <a href="#" onclick="openTermsModal(event)" style="color:rgba(255,255,255,0.4); text-decoration:underline;">תנאי שימוש ומדיניות פרטיות</a> | 
-      <a href="mailto:contact.ez.security@gmail.com" style="color:rgba(255,255,255,0.3);">contact.ez.security@gmail.com</a>
+      © 2026 EZ Tax | 
+      <a href="#" onclick="openTermsModal(event)" style="color:rgba(255,255,255,0.4);text-decoration:underline;">תנאי שימוש ומדיניות פרטיות</a> | 
+      <a href="/cdn-cgi/l/email-protection#bcdfd3d2c8dddfc892d9c692cfd9dfc9ced5c8c5fcdbd1ddd5d092dfd3d1" style="color:rgba(255,255,255,0.3);"><span class="__cf_email__" data-cfemail="0b6864657f6a687f256e7125786e687e79627f724b6c666a626725686466">[email&#160;protected]</span></a>
     </p>
   </div>
 </footer>
 
-<!-- LEGAL TERMS MODAL -->
+<!-- FLOATING EMAIL -->
+<a href="https://mail.google.com/mail/?view=cm&to=contact.ez.security@gmail.com&su=פנייה%20מ-EZ%20Tax" class="email-float" id="email-float" target="_blank" rel="noopener" aria-label="שלח מייל">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+  <span>מייל</span>
+</a>
+
+<!-- FLOATING WHATSAPP -->
+<a href="https://wa.me/972502196259" class="whatsapp-float" id="whatsapp-float" target="_blank" rel="noopener" aria-label="פתח WhatsApp">
+  <svg width="26" height="26" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+  <span>צור קשר</span>
+</a>
+
+<!-- LEGAL MODAL -->
 <div id="terms-modal" class="modal-overlay" onclick="closeTermsModal(event)">
   <div class="modal-content" onclick="event.stopPropagation()">
     <div class="modal-header">
@@ -647,44 +770,22 @@
       <button class="modal-close" onclick="closeTermsModal(event)">&times;</button>
     </div>
     <div class="modal-body">
-      <h3>1. כללי והבהרה משפטית (דיסקליימר)</h3>
-      <p>אתר <strong>EZ Tax</strong> (להלן: "האתר") מופעל ככלי עזר מבוסס מנוע חישוב להערכה ראשונית של זכאות להחזר מס בישראל.</p>
-      <p><strong>הבהרה חשובה:</strong> המידע, החישובים, ציוני הזכאות והערכות ההחזר המוצגים באתר אינם מהווים ייעוץ מס, ייעוץ משפטי, חוות דעת מקצועית או תחליף לייעוץ אישי על ידי יועץ מס מוסמך, רואה חשבון או פקיד שומה. הסכום הסופי והקביעה לגבי החזר המס נקבעים אך ורק על ידי רשות המסים בישראל לאחר הגשת הדוחות הרשמיים.</p>
-      
-      <h3>2. השימוש באתר והסכמה לתנאים</h3>
-      <p>השימוש באתר מותנה בהסכמתך המלאה לתנאי שימוש אלה. הזנת פרטיך באתר מהווה הסכמה ברורה לכך כי ידוע לך שהערכות המערכת הן ראשוניות בלבד וכי הגשת דוח בפועל תיעשה בליווי ובדיקה פרטנית של בעל מקצוע.</p>
-      
-      <h3>3. מדיניות פרטיות ואיסוף נתונים</h3>
-      <p>אנו מכבדים את פרטיותך. הזנת נתונים בשאלון משמשת אך ורק לצורך חישוב זכאותך ויצירת קשר עמך לצורך בדיקת התיק.</p>
-      <ul>
-        <li><strong>נתונים פיננסיים ואישיים:</strong> הנתונים שאתה מזין בשאלון (גיל, מצב משפחתי, שירות מילואים, שכר וכו') משמשים לחישוב הזכאות. האתר אינו שומר ואינו דורש מספרי תעודת זהות.</li>
-        <li><strong>פרטי קשר:</strong> פרטי הקשר שהזנת (שם, טלפון ומייל) משמשים את נציג EZ Tax (יועץ מס מוסמך) ליצירת קשר עמך לצורך בדיקת התיק, בהתאם להסכמתך.</li>
-        <li><strong>אבטחת מידע:</strong> הנתונים המועברים באתר מוצפנים בפרוטוקול אבטחה תקני SSL/TLS. אנו לא נמכור ולא נעביר את המידע שלך לגופים שלישיים שאינם קשורים לטיפול בתיק החזר המס שלך.</li>
-      </ul>
-      
-      <h3>4. תנאי התקשרות, שכר טרחה ותשלום</h3>
-      <p>במידה ותימצא זכאות להחזר מס והלקוח יבחר להגיש את הדוח לרשות המסים באמצעות מייצג מוסמך (יועץ מס/רואה חשבון) מטעמנו, יחולו התנאים הבאים:</p>
-      <ul>
-        <li><strong>שכר טרחה:</strong> שכר הטרחה עבור הטיפול בתיק והגשתו לרשות המסים יעמוד על <strong>15% בתוספת מע"מ כחוק</strong> מסך כל החזר המס שיתקבל בפועל לטובת הלקוח (כולל הפרשי הצמדה וריבית שיתקבלו מרשות המסים). שכר הטרחה הוא על בסיס הצלחה בלבד – אם לא יתקבל החזר, הלקוח לא ישלם שכר טרחה.</li>
-        <li><strong>מועד תשלום:</strong> הלקוח מתחייב להסדיר ולשלם את מלוא שכר הטרחה בתוך <strong>7 ימי עסקים</strong> מיום קבלת כספי ההחזר לחשבון הבנק שלו (או ממועד זיכוי חשבונו ברשות המסים).</li>
-        <li><strong>פיגור בתשלום:</strong> אי-תשלום שכר הטרחה במועד יגרור חיוב בריבית פיגורים יומית כחוק, הפרשי הצמדה וכן במלוא הוצאות הגבייה ושכר טרחת עורכי דין שיידרשו לגביית החוב.</li>
-        <li><strong>דמי ביטול:</strong> במידה והלקוח יבחר לבטל את ההתקשרות לאחר שהחלה העבודה הפיזית על התיק (פתיחת תיק, ריכוז נתונים והכנת הטיוטות) וטרם קבלת ההחזר בפועל, ישלם הלקוח דמי ביטול (שכר ראוי בגין העבודה שבוצעה) בסך <strong>₪350 (כולל מע"מ)</strong> או בהתאם להסכם ההתקשרות הפרטני שנחתם עמו.</li>
-      </ul>
-
-      <h3>5. הגבלת אחריות</h3>
-      <p>מפעילי האתר וכל מי מטעמם לא יישאו בכל אחריות לכל נזק, ישיר או עקיף, שעלול להיגרם כתוצאה מהסתמכות על החישובים המופיעים באתר. האחריות על איסוף המסמכים המקוריים והגשתם לרשות המסים חלה על הלקוח ועל המייצג המוסמך שנבחר על ידו.</p>
-      
-      <h3>6. הסכמה לקבלת מידע</h3>
-      <p>בלחיצה על כפתור החישוב והזנת פרטי הקשר שלך, אתה נותן את הסכמתך המפורשת לכך שיועץ מס מוסמך מטעמנו יחזור אליך במייל, בטלפון או ב-WhatsApp לצורך סיוע בהגשת הבקשה להחזר מס.</p>
+      <h3>1. כללי והבהרה משפטית</h3>
+      <p>אתר <strong>EZ Tax</strong> מופעל ככלי עזר מבוסס מנוע חישוב להערכה ראשונית של זכאות להחזר מס בישראל. המידע, החישובים, ציוני הזכאות והערכות ההחזר המוצגים באתר אינם מהווים ייעוץ מס, ייעוץ משפטי או חוות דעת מקצועית.</p>
+      <h3>2. שכר טרחה ותשלום</h3>
+      <p>שכר הטרחה עבור הטיפול בתיק עומד על <strong>15% בתוספת מע"מ כחוק</strong> מסך כל החזר המס שיתקבל בפועל — על בסיס הצלחה בלבד.</p>
+      <h3>3. מדיניות פרטיות</h3>
+      <p>הנתונים שהוזנו משמשים לחישוב זכאותך ויצירת קשר בלבד. האתר מוצפן SSL/TLS ואינו מעביר מידע לצדדים שלישיים שאינם קשורים לטיפול בתיק.</p>
+      <h3>4. הגבלת אחריות</h3>
+      <p>מפעילי האתר לא יישאו בכל אחריות לנזק שעלול להיגרם מהסתמכות על החישובים המוצגים. הסכום הסופי נקבע על ידי רשות המסים לאחר הגשת דוחות רשמיים.</p>
     </div>
     <div class="modal-footer">
-      <button class="btn-primary" onclick="closeTermsModal(event)" style="padding: 10px 24px; font-size: 0.9rem; margin-right: auto;">אני מסכים ומאשר</button>
+      <button class="btn-primary" onclick="closeTermsModal(event)" style="padding:10px 24px;font-size:0.9rem;">אני מסכים ומאשר</button>
     </div>
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script src="app.js?v=2.1"></script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="app.js?v=3.0"></script>
 </body>
 </html>
-

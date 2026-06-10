@@ -230,7 +230,7 @@ for (const year of [2020, 2021, 2022, 2023, 2024, 2025]) {
 // ─── STATE ───────────────────────────────────────────────────
 let currentStep = 1;
 let leadSubmitted = false;
-const TOTAL_STEPS = 5;
+const TOTAL_STEPS = 6;
 const formData = {
   firstName: '',
   taxYear: 2025,
@@ -268,6 +268,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initFormNav();
   animateHeroCard();
   initDynamicQuestions();
+  initFileUpload();
+  updateLiveEstimate();
   
   if (CONFIG.emailjsPublicKey && typeof emailjs !== 'undefined') {
     emailjs.init({
@@ -353,6 +355,7 @@ function initSliders() {
       ageSlider.value = val;
       updateSliderFill(ageSlider);
     }
+    updateLiveEstimate();
   }
   
   if (ageSlider) {
@@ -395,6 +398,7 @@ function initSliders() {
       childrenSlider.value = val;
       updateSliderFill(childrenSlider);
     }
+    updateLiveEstimate();
   }
   
   if (childrenSlider) {
@@ -437,6 +441,7 @@ function initSliders() {
       incomeSlider.value = val;
       updateSliderFill(incomeSlider);
     }
+    updateLiveEstimate();
   }
   
   if (incomeSlider) {
@@ -513,6 +518,7 @@ function initChips() {
         group.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
         chip.classList.add('active');
         setter(chip.dataset.val);
+        updateLiveEstimate();
       });
     });
   }
@@ -552,6 +558,7 @@ function initChips() {
             setter(activeChips.map(c => c.dataset.val));
           }
         }
+        updateLiveEstimate();
       });
     });
   }
@@ -559,6 +566,7 @@ function initChips() {
   // Tax year select
   document.getElementById('taxYear').addEventListener('change', e => {
     formData.taxYear = parseInt(e.target.value);
+    updateLiveEstimate();
   });
 
   // Phone
@@ -600,12 +608,19 @@ function initDynamicQuestions() {
 function initFormNav() {
   document.getElementById('btn-next').addEventListener('click', handleNext);
   document.getElementById('btn-back').addEventListener('click', handleBack);
+  
+  const skipBtn = document.getElementById('btn-skip-upload');
+  if (skipBtn) {
+    skipBtn.addEventListener('click', () => {
+      runAnalysis();
+    });
+  }
 }
 
 function handleNext() {
-  if (currentStep < TOTAL_STEPS) {
+  if (currentStep < 5) {
     goToStep(currentStep + 1);
-  } else {
+  } else if (currentStep === 5) {
     const phoneInput = document.getElementById('phone');
     const emailInput = document.getElementById('email');
     const agreeTerms = document.getElementById('agree-terms');
@@ -653,13 +668,135 @@ function handleNext() {
 
     if (hasError) return;
 
-    // שמירת הערכים הסופיים ב-formData (פותר בעיית השלמה אוטומטית/Autofill של הדפדפן)
+    // שמירת הערכים
     formData.phone = phoneVal;
     formData.email = emailVal;
     formData.firstName = document.getElementById('firstName').value.trim();
 
-    // SUBMIT → run analysis
+    goToStep(6);
+  } else if (currentStep === 6) {
     runAnalysis();
+  }
+}
+
+function renderDocsChecklist() {
+  const listEl = document.getElementById('docs-checklist');
+  if (!listEl) return;
+  
+  const result = runCalculation(formData);
+  listEl.innerHTML = '';
+  
+  const priorityOrder = { critical: 0, important: 1, optional: 2 };
+  const sortedDocs = [...result.docs].sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+  
+  sortedDocs.forEach((doc) => {
+    const el = document.createElement('div');
+    el.className = `doc-check-item ${doc.priority}`;
+    const badgeText = { critical: 'חובה', important: 'חשוב', optional: 'אופציונלי' };
+    el.innerHTML = `
+      <label class="checkbox-container" style="display:flex; align-items:center; width:100%; margin-bottom: 8px;">
+        <input type="checkbox" checked disabled style="margin-left: 10px;" />
+        <span>${doc.text}</span>
+        <span class="doc-badge ${doc.priority}" style="margin-right:auto; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700;">${badgeText[doc.priority]}</span>
+      </label>
+    `;
+    listEl.appendChild(el);
+  });
+}
+
+let uploadedFiles = [];
+
+function initFileUpload() {
+  const uploadZone = document.getElementById('upload-zone');
+  const fileUploadInput = document.getElementById('file-upload');
+  const uploadedFilesList = document.getElementById('uploaded-files-list');
+
+  if (!uploadZone || !fileUploadInput) return;
+
+  uploadZone.addEventListener('click', (e) => {
+    if (e.target.tagName !== 'BUTTON') {
+      fileUploadInput.click();
+    }
+  });
+
+  ['dragenter', 'dragover'].forEach(eventName => {
+    uploadZone.addEventListener(eventName, (e) => {
+      e.preventDefault();
+      uploadZone.classList.add('dragover');
+    }, false);
+  });
+
+  ['dragleave', 'drop'].forEach(eventName => {
+    uploadZone.addEventListener(eventName, (e) => {
+      e.preventDefault();
+      uploadZone.classList.remove('dragover');
+    }, false);
+  });
+
+  uploadZone.addEventListener('drop', (e) => {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    handleUploadedFiles(files);
+  });
+
+  fileUploadInput.addEventListener('change', (e) => {
+    handleUploadedFiles(e.target.files);
+  });
+
+  function handleUploadedFiles(files) {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (file.size > 10 * 1024 * 1024) {
+        alert(`הקובץ ${file.name} גדול מדי. הגודל המקסימלי הוא 10MB.`);
+        continue;
+      }
+      if (uploadedFiles.some(f => f.name === file.name && f.size === file.size)) {
+        continue;
+      }
+      uploadedFiles.push(file);
+    }
+    renderUploadedFiles();
+  }
+
+  function renderUploadedFiles() {
+    if (!uploadedFilesList) return;
+    uploadedFilesList.innerHTML = '';
+    
+    if (uploadedFiles.length === 0) {
+      uploadedFilesList.style.display = 'none';
+      return;
+    }
+    uploadedFilesList.style.display = 'flex';
+    uploadedFilesList.style.flexDirection = 'column';
+    uploadedFilesList.style.gap = '8px';
+    uploadedFilesList.style.marginTop = '16px';
+
+    uploadedFiles.forEach((file, idx) => {
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      const fileEl = document.createElement('div');
+      fileEl.style.cssText = `
+        display:flex; align-items:center; gap:12px;
+        background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08);
+        padding:10px 14px; border-radius:8px; font-size:0.85rem;
+      `;
+      fileEl.innerHTML = `
+        <span>📄</span>
+        <div style="flex:1;">
+          <div style="font-weight:600; color:var(--text);">${file.name}</div>
+          <div style="font-size:0.75rem; color:var(--text-muted);">${sizeMB} MB</div>
+        </div>
+        <button class="uf-remove" type="button" data-idx="${idx}" style="background:transparent; border:none; color:#ef4444; font-size:1.2rem; cursor:pointer; padding:0 4px;">&times;</button>
+      `;
+      uploadedFilesList.appendChild(fileEl);
+    });
+
+    uploadedFilesList.querySelectorAll('.uf-remove').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.idx);
+        uploadedFiles.splice(idx, 1);
+        renderUploadedFiles();
+      });
+    });
   }
 }
 
@@ -698,6 +835,10 @@ function goToStep(step) {
   stepEl.querySelectorAll('input[type="range"]').forEach(slider => {
     updateSliderFill(slider);
   });
+
+  if (step === 6) {
+    renderDocsChecklist();
+  }
 
   updateProgress();
   window.scrollTo({ top: document.getElementById('calculator').offsetTop - 100, behavior: 'smooth' });
@@ -1117,6 +1258,21 @@ function deduplicateDocs(docs) {
   });
 }
 
+function updateLiveEstimate() {
+  const bar = document.getElementById('live-estimate-bar');
+  const lebAmount = document.getElementById('leb-amount');
+  if (!bar || !lebAmount) return;
+
+  const res = runCalculation(formData);
+  if (res.refundMax > 0) {
+    lebAmount.textContent = `₪${res.refundMin.toLocaleString('he-IL')} - ₪${res.refundMax.toLocaleString('he-IL')}`;
+    bar.classList.add('visible');
+  } else {
+    lebAmount.textContent = '₪0';
+    bar.classList.remove('visible');
+  }
+}
+
 
 // ─── ANALYSIS FLOW ───────────────────────────────────────────
 async function runAnalysis() {
@@ -1338,6 +1494,8 @@ async function submitLeadByEmail(result, data) {
     ? data.extraIncome.filter(x => x !== 'no').map(ei => ({rent:'שכ"ד', capital:'רווחי הון', foreign:'חו"ל'}[ei] || ei)).join(', ')
     : (data.extraIncome !== 'no' ? data.extraIncome : '');
 
+  const fileNames = uploadedFiles.map(f => f.name).join(', ');
+
   // ── הכנת גוף המייל ──
   const emailBody = {
     access_key: CONFIG.web3formsKey,
@@ -1365,6 +1523,7 @@ async function submitLeadByEmail(result, data) {
     'תרומות': data.donations !== 'no' ? data.donations : 'לא',
     'פנסיה עצמית': data.pension === 'self' ? 'כן' : 'לא',
     'הכנסות נוספות': extraIncomeTranslated || 'לא',
+    'קבצים שהועלו': fileNames || 'לא הועלו קבצים',
     'תאריך': new Date().toLocaleString('he-IL'),
     'מקור': 'EZ Tax Calculator',
   };
@@ -1433,6 +1592,19 @@ function toggleFaq(el) {
 function resetForm() {
   currentStep = 1;
   leadSubmitted = false;
+
+  // Clear uploaded files state
+  uploadedFiles = [];
+  const uploadedFilesList = document.getElementById('uploaded-files-list');
+  if (uploadedFilesList) {
+    uploadedFilesList.innerHTML = '';
+    uploadedFilesList.style.display = 'none';
+  }
+  const fileUploadInput = document.getElementById('file-upload');
+  if (fileUploadInput) {
+    fileUploadInput.value = '';
+  }
+
   document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
   document.getElementById('step-1').classList.add('active');
   document.getElementById('progress-wrap').classList.remove('hidden');
@@ -1490,6 +1662,8 @@ function sendEmailReport() {
 
   console.log('✉️ Attempting automatic send via EmailJS to:', emailTo, { name, taxYear: d.taxYear });
 
+  const filesListText = uploadedFiles.length > 0 ? uploadedFiles.map(f => f.name).join(', ') : 'לא הועלו קבצים';
+
   // 2. שלח ללקוח (EmailJS או Mailto)
   if (CONFIG.emailjsServiceId && CONFIG.emailjsTemplateId && CONFIG.emailjsPublicKey && typeof emailjs !== 'undefined') {
     showEmailSendingBadge();
@@ -1506,7 +1680,8 @@ function sendEmailReport() {
       probability: r.probability,
       reasons: reasonsText,
       documents: docsText,
-      client_phone: d.phone
+      client_phone: d.phone,
+      uploaded_files: filesListText
     };
 
     emailjs.send(CONFIG.emailjsServiceId, CONFIG.emailjsTemplateId, emailParams)
@@ -1544,6 +1719,7 @@ function openMailtoFallback(emailTo, name, taxYear, r, reasonsText, docsText) {
     `--------------------------------------------------\n\n` +
     `💡 סיבות הזכאות שזוהו:\n${reasonsText}\n\n` +
     `📋 מסמכים שצריך לאסוף כדי לבקש את ההחזר:\n${docsText}\n\n` +
+    `📁 קבצים שהועלו:\n${uploadedFiles.length > 0 ? uploadedFiles.map(f => f.name).join('\n') : 'לא הועלו קבצים'}\n\n` +
     `--------------------------------------------------\n` +
     `מה עושים עכשיו?\n` +
     `1. אוספים את המסמכים המופיעים ברשימה לעיל.\n` +

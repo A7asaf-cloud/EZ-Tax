@@ -1307,13 +1307,15 @@ function sendWhatsApp() {
 
   // 2. פתח WhatsApp
   const waMsg = encodeURIComponent(
-    `שלום, אני ${name}${phone}${email}\n` +
-    `בדקתי זכאות להחזר מס ${d.taxYear} באתר EZ Tax:\n\n` +
-    `📊 ציון: ${r.eligibilityScore}/100\n` +
-    `💰 החזר משוער: ₪${r.refundMin.toLocaleString('he-IL')} – ₪${r.refundMax.toLocaleString('he-IL')}\n` +
-    `📈 סבירות: ${r.probability}\n` +
-    `✅ סיבות: ${r.reasons.slice(0,3).map(x => x.text).join(' | ')}\n\n` +
-    `אשמח לתאם פגישה. תודה!`
+    `שלום לצוות יועצי המס של EZ Tax,\n` +
+    `שמי ${name}${phone}${email}.\n` +
+    `ביצעתי בדיקת זכאות להחזר מס לשנת ${d.taxYear} באתר שלכם, ואשמח לקבל ליווי מקצועי להגשת הדו"ח מול מס הכנסה.\n\n` +
+    `להלן פרטי הזכאות המשוערת שחושבו בסימולטור:\n` +
+    `📊 ציון זכאות: ${r.eligibilityScore}/100\n` +
+    `💰 טווח החזר מס משוער: ₪${r.refundMin.toLocaleString('he-IL')} – ₪${r.refundMax.toLocaleString('he-IL')}\n` +
+    `📈 סבירות קבלת החזר: ${r.probability}\n` +
+    `✅ סיבות עיקריות: ${r.reasons.slice(0,3).map(x => x.text).join(' | ')}\n\n` +
+    `אשמח שתצרו איתי קשר בהקדם להמשך בדיקה והגשת התיק. תודה!`
   );
   window.open(`https://wa.me/${CONFIG.whatsappNumber}?text=${waMsg}`, '_blank');
 }

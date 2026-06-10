@@ -234,6 +234,7 @@ const TOTAL_STEPS = 5;
 const formData = {
   firstName: '',
   taxYear: 2025,
+  gender: 'male',
   age: 32,
   maritalStatus: 'single',
   hasChildren: 'no',
@@ -488,6 +489,7 @@ function updateSliderFill(slider) {
 function initChips() {
   const chipGroups = {
     'marital-chips':       (v) => formData.maritalStatus = v,
+    'gender-chips':        (v) => formData.gender = v,
     'has-children-chips':  (v) => { formData.hasChildren = v; toggleChildrenFields(v); },
     'youngest-child-chips': (v) => formData.youngestChildAge = v,
     'single-parent-chips': (v) => formData.singleParent = v,
@@ -745,31 +747,45 @@ function getMarginalRate(income, brackets) {
 }
 
 function calculateCreditPoints(data, rules) {
-  let points = 2.25; // base for everyone
-
-  if (data.maritalStatus === 'married') points = 2.25;
-  if (data.maritalStatus === 'single' && data.age >= 18) points = 2.25;
-  if (data.maritalStatus === 'divorced') points = 2.25;
-  if (data.maritalStatus === 'widowed') points = 2.25;
+  // Base points: 2.25 for men, 2.75 for women
+  let points = (data.gender === 'female') ? 2.75 : 2.25;
 
   // Children
   if (data.hasChildren === 'yes') {
-    const childAge = data.youngestChildAge;
-    const childRules = {
-      '0-5':   1.5,
-      '6-13':  1.5,
-      '14-17': 1.0,
-      '18+':   0.0,
-    };
-    const perChild = childRules[childAge] || 1.0;
-    points += perChild * Math.min(data.childrenCount, 6);
+    let childPoints = 0;
+    const isFemale = (data.gender === 'female');
+    const youngestAge = data.youngestChildAge; // '0-5', '6-13', '14-17', '18+'
+    const count = Math.min(data.childrenCount, 8); // clamp to 8 children max
+
+    if (data.taxYear >= 2024) {
+      // 2024-2026 Rules (Family Credit Points Reform)
+      if (youngestAge === '0-5') {
+        childPoints = 3.0 * count; // Average of 3.0 points per child for both father and mother
+      } else if (youngestAge === '6-13' || youngestAge === '14-17') {
+        childPoints = (isFemale ? 2.0 : 1.0) * count;
+      } else if (youngestAge === '18+') {
+        childPoints = (isFemale ? 0.5 : 0.0) * count;
+      }
+    } else {
+      // 2020-2023 Rules
+      if (youngestAge === '0-5') {
+        childPoints = (isFemale ? 1.5 : 0.75) * count;
+      } else if (youngestAge === '6-13') {
+        childPoints = (isFemale ? 1.0 : 0.5) * count;
+      } else if (youngestAge === '14-17') {
+        childPoints = (isFemale ? 1.0 : 0.0) * count;
+      } else if (youngestAge === '18+') {
+        childPoints = (isFemale ? 0.5 : 0.0) * count;
+      }
+    }
+    points += childPoints;
   }
 
   // Single parent
   if (data.singleParent === 'yes') points += 1.0;
 
-  // New immigrant
-  if (data.newImmigrant === 'yes') points += 1.0;
+  // New immigrant (average points per year during the 3.5 or 4.5 year eligibility window)
+  if (data.newImmigrant === 'yes') points += 2.0;
 
   // Disability
   const disabilityPts = { 'no': 0, '10-49': 0.5, '50-99': 1.5, '100+': 2.25 };
@@ -1336,6 +1352,7 @@ async function submitLeadByEmail(result, data) {
     'סבירות': result.probability,
     'סיבות עיקריות': result.reasons.map(r => r.text).join(' | '),
     'מצב משפחתי': data.maritalStatus,
+    'מגדר': data.gender === 'female' ? 'אישה' : 'גבר',
     'ילדים': data.hasChildren === 'yes' ? data.childrenCount : 'אין',
     'מילואים': data.reserveDuty !== 'no' ? data.reserveDuty + ' ימים' : 'לא',
     'חופשה/אבטלה/חלד': leaveTypesTranslated || 'לא',

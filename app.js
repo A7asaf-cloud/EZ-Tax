@@ -321,13 +321,14 @@ window.openContactModal = function(e) {
   
   const nameInput = document.getElementById('contact-name');
   const phoneInput = document.getElementById('contact-phone');
+  const emailInput = document.getElementById('contact-email');
   const messageInput = document.getElementById('contact-message');
   const errorDiv = document.getElementById('contact-error');
   
   if (errorDiv) errorDiv.style.display = 'none';
   if (messageInput) messageInput.value = '';
   
-  // Try to pre-fill name/phone if the user already submitted the main form
+  // Try to pre-fill name/phone/email if the user already submitted the main form
   if (window.lastFormData) {
     if (nameInput && window.lastFormData.firstName) {
       nameInput.value = window.lastFormData.firstName;
@@ -335,9 +336,13 @@ window.openContactModal = function(e) {
     if (phoneInput && window.lastFormData.phone) {
       phoneInput.value = window.lastFormData.phone;
     }
+    if (emailInput && window.lastFormData.email) {
+      emailInput.value = window.lastFormData.email;
+    }
   } else {
     if (nameInput) nameInput.value = '';
     if (phoneInput) phoneInput.value = '';
+    if (emailInput) emailInput.value = '';
   }
   
   const modal = document.getElementById('contact-modal');
@@ -357,21 +362,23 @@ window.closeContactModal = function(e) {
 function getContactInfo() {
   const nameEl = document.getElementById('contact-name');
   const phoneEl = document.getElementById('contact-phone');
+  const emailEl = document.getElementById('contact-email');
   const messageEl = document.getElementById('contact-message');
   const errorEl = document.getElementById('contact-error');
   
   const name = nameEl ? nameEl.value.trim() : '';
   const phone = phoneEl ? phoneEl.value.trim() : '';
+  const email = emailEl ? emailEl.value.trim() : '';
   const message = messageEl ? messageEl.value.trim() : '';
   
-  // Validation: name at least 2 chars, phone at least 9 chars
-  if (name.length < 2 || phone.length < 9) {
+  // Validation: name at least 2 chars, phone at least 9 chars, email contains @
+  if (name.length < 2 || phone.length < 9 || !email.includes('@')) {
     if (errorEl) errorEl.style.display = 'block';
     return null;
   }
   
   if (errorEl) errorEl.style.display = 'none';
-  return { name, phone, message };
+  return { name, phone, email, message };
 }
 
 function showContactSuccessView() {
@@ -381,11 +388,41 @@ function showContactSuccessView() {
   if (successContainer) successContainer.style.display = 'block';
 }
 
+// Background submission to Web3Forms to log the lead and trigger confirmation emails
+async function submitContactLead(info) {
+  try {
+    const payload = {
+      access_key: CONFIG.web3formsKey,
+      subject: `📞 פנייה חדשה מצור קשר | ${info.name}`,
+      from_name: 'EZ Tax Contact',
+      name: info.name,
+      phone: info.phone,
+      email: info.email,
+      message: info.message || 'ללא הודעה מפורטת',
+      replyto: info.email
+    };
+    
+    fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+  } catch (err) {
+    console.warn('Background contact submission failed:', err);
+  }
+}
+
 window.openWhatsApp = function(e) {
   if (e) e.preventDefault();
   
   const info = getContactInfo();
   if (!info) return; // Validation failed
+  
+  // Trigger background submission for auto-reply email & admin log
+  submitContactLead(info);
   
   const phone = CONFIG.whatsappNumber || '972502196259';
   
@@ -409,12 +446,16 @@ window.openMailApp = function(e) {
   const info = getContactInfo();
   if (!info) return; // Validation failed
   
+  // Trigger background submission for auto-reply email & admin log
+  submitContactLead(info);
+  
   const email = 'contact.ez.security@gmail.com';
   const subject = encodeURIComponent('פנייה לשירות הלקוחות - EZ Tax');
   
   let mailBody = 'שלום רב,\n\n' +
     `שם מלא: ${info.name}\n` +
-    `טלפון לחזרה: ${info.phone}\n\n` +
+    `טלפון לחזרה: ${info.phone}\n` +
+    `אימייל: ${info.email}\n\n` +
     'אני פונה אליכם בעקבות הבדיקה שביצעתי באתר EZ Tax. אשמח שנציג שירות יחזור אליי לקבלת מענה והסבר.';
     
   if (info.message) {

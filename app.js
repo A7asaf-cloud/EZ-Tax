@@ -312,6 +312,27 @@ function toggleContactMenu(e) {
   dd.classList.toggle('open');
 }
 
+window.openWhatsApp = function(e) {
+  if (e) e.preventDefault();
+  const phone = '972502196259';
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  if (isMobile) {
+    window.location.href = `whatsapp://send?phone=${phone}`;
+    setTimeout(() => {
+      window.location.href = `https://wa.me/${phone}`;
+    }, 500);
+  } else {
+    window.open(`https://web.whatsapp.com/send?phone=${phone}`, '_blank');
+  }
+};
+
+window.openMailApp = function(e) {
+  if (e) e.preventDefault();
+  const email = 'contact.ez.security@gmail.com';
+  const subject = encodeURIComponent('פנייה מ-EZ Tax');
+  window.location.href = `mailto:${email}?subject=${subject}`;
+};
+
 // Close dropdown when clicking anywhere else
 document.addEventListener('click', (e) => {
   const wrap = document.getElementById('nav-contact-wrap');
@@ -1492,8 +1513,37 @@ function sendWhatsApp() {
     `✅ סיבות עיקריות: ${r.reasons.slice(0,3).map(x => x.text).join(' | ')}\n\n` +
     `אשמח שתצרו איתי קשר בהקדם להמשך בדיקה והגשת התיק. תודה!`
   );
-  window.open(`https://wa.me/${CONFIG.whatsappNumber}?text=${waMsg}`, '_blank');
+  
+  const targetPhone = CONFIG.whatsappNumber || '972502196259';
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  if (isMobile) {
+    window.location.href = `whatsapp://send?phone=${targetPhone}&text=${waMsg}`;
+    setTimeout(() => {
+      window.location.href = `https://wa.me/${targetPhone}?text=${waMsg}`;
+    }, 500);
+  } else {
+    window.open(`https://web.whatsapp.com/send?phone=${targetPhone}&text=${waMsg}`, '_blank');
+  }
 }
+
+window.sendDocsWhatsApp = function() {
+  const targetPhone = CONFIG.whatsappNumber || '972502196259';
+  const name = (window.lastFormData && window.lastFormData.firstName) || 'לקוח';
+  const taxYear = (window.lastFormData && window.lastFormData.taxYear) || '2025';
+  const waMsg = encodeURIComponent(
+    `שלום, שמי ${name}.\n` +
+    `אני מעוניין לשלוח את המסמכים הדרושים לבדיקת החזר המס שלי עבור שנת ${taxYear}.`
+  );
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  if (isMobile) {
+    window.location.href = `whatsapp://send?phone=${targetPhone}&text=${waMsg}`;
+    setTimeout(() => {
+      window.location.href = `https://wa.me/${targetPhone}?text=${waMsg}`;
+    }, 500);
+  } else {
+    window.open(`https://web.whatsapp.com/send?phone=${targetPhone}&text=${waMsg}`, '_blank');
+  }
+};
 
 // ─── SUBMIT EMAIL — Web3Forms (ללא הרשמה!) ───────────────────
 async function submitLeadByEmail(result, data) {
@@ -1580,7 +1630,7 @@ function showEmailFallback(body) {
       .map(([k,v]) => `${k}: ${v}`)
       .join('\n')
   );
-  window.open(`mailto:${CONFIG.contactEmail}?subject=${subject}&body=${text}`);
+  window.location.href = `mailto:${CONFIG.contactEmail}?subject=${subject}&body=${text}`;
 }
 
 // ── הצג הודעת אישור ──
@@ -1747,7 +1797,7 @@ function openMailtoFallback(emailTo, name, taxYear, r, reasonsText, docsText) {
     `בברכה,\n` +
     `צוות EZ Tax`
   );
-  window.open(`mailto:${emailTo}?subject=${subject}&body=${bodyText}`);
+  window.location.href = `mailto:${emailTo}?subject=${subject}&body=${bodyText}`;
 }
 
 function showEmailSendingBadge() {

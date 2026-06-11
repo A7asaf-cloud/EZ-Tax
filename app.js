@@ -1,7 +1,7 @@
 /* =============================================
    TaxOS — Tax Calculation Engine + UI Logic
    ============================================= */
-console.log("🚀 EZ Tax — Code Version 2.3 Loaded — Diagnostics Active");
+console.log("🚀 EZ Tax — Code Version 2.5 Loaded — Diagnostics Active");
 
 // ─── הגדרות אישיות — שנה כאן בלבד! ─────────────────────────────
 const CONFIG = {
@@ -116,6 +116,7 @@ const TAX_RULES = {
     reserveSystem: 'PER_DAY',
     reservePerDayFallback: 345,
     donationMinimum: 190,
+    maxPensionDeductionIncomeMonthly: 33290, // תקרת שכר מוכר 2025 (מקור: רשות המסים)
     maxPensionDeductionIncome: 34900 * 12,
   },
 
@@ -136,6 +137,7 @@ const TAX_RULES = {
     reserveSystem: 'PER_DAY',
     reservePerDayFallback: 335,
     donationMinimum: 190,
+    maxPensionDeductionIncomeMonthly: 31340, // תקרת שכר מוכר 2024 (מקור: רשות המסים)
     maxPensionDeductionIncome: 34900 * 12,
   },
 
@@ -156,6 +158,7 @@ const TAX_RULES = {
     reserveSystem: 'PER_DAY',
     reservePerDayFallback: 313,
     donationMinimum: 190,
+    maxPensionDeductionIncomeMonthly: 28000, // תקרת שכר מוכר 2023 (מקור: רשות המסים)
     maxPensionDeductionIncome: 33775 * 12,
   },
 
@@ -174,8 +177,11 @@ const TAX_RULES = {
       { from: 505920,  to: Infinity, rate: 0.47 }
     ],
     reserveSystem: 'PER_DAY',
+    // 2022: תגמול שנתי נוסף (לא נקודות זיכוי) — משולם ישירות לחשבון הבנק לפי ימי שירות
+    // מקור: רשות המסים — מחושב לפי שווי נקודת זיכוי × מקדם
     reservePerDayFallback: 290,
-    donationMinimum: 190,
+    donationMinimum: 190,      // מינימום ₪190 לשנת 2022 — מאושר כנכון (כל-זכות)
+    maxPensionDeductionIncomeMonthly: 26378, // תקרת שכר מוכר 2022 — ₪26,378/חודש (מקור: רשות המסים)
     maxPensionDeductionIncome: 32700 * 12,
   },
 
@@ -196,6 +202,7 @@ const TAX_RULES = {
     reserveSystem: 'PER_DAY',
     reservePerDayFallback: 275,
     donationMinimum: 190,
+    maxPensionDeductionIncomeMonthly: 25000, // תקרת שכר מוכר 2021 (הערכה)
     maxPensionDeductionIncome: 32500 * 12,
   },
 
@@ -216,6 +223,7 @@ const TAX_RULES = {
     reserveSystem: 'PER_DAY',
     reservePerDayFallback: 262,
     donationMinimum: 190,
+    maxPensionDeductionIncomeMonthly: 24000, // תקרת שכר מוכר 2020 (הערכה)
     maxPensionDeductionIncome: 31700 * 12,
   },
 };
@@ -1300,12 +1308,13 @@ function runCalculation(data) {
         reserveDesc = `מילואים ~${daysApprox} ימים (זיכוי יומי ₪${daily})`;
       }
     } else {
-      // ─ 2020–2025: זיכוי יומי קלאסי ─
+      // ─ 2020–2025: תגמול שנתי נוסף (לא זיכוי מס ישיר — משולם ישירות לחשבון) ─
+      // מקור: רשות המסים — חישוב לפי ימי שירות × ערך תגמול יומי
       const daysApprox = { '1-14': 10, '15-29': 22, '30-39': 35, '40-49': 45, '50-74': 60, '75+': 90 }[reserveKey] || 10;
       const daily = rules.reservePerDayFallback || 335;
       reserveRefundMin = daysApprox * daily;
       reserveRefundMax = Math.round(daysApprox * daily * 1.2);
-      reserveDesc = `שירות מילואים (~${daysApprox} ימים × ₪${daily}/יום)`;
+      reserveDesc = `שירות מילואים — תגמול שנתי (~${daysApprox} ימים × ₪${daily}/יום)`;
     }
 
     reasons.push({
@@ -1411,14 +1420,20 @@ function runCalculation(data) {
   }
 
   // 8. DISCHARGED SOLDIER / NATIONAL SERVICE
+  // מקור: כל-זכות / פקודת מס הכנסה — מקסימום 2 נקודות זיכוי (לשירות מלא 23+ חודשים)
+  // תוקף: 36 חודשים מחודש שלאחר השחרור
   if (data.soldierDischarge && data.soldierDischarge !== 'no') {
     const cpAnnual = rules.creditPointValueAnnual || 2904;
-    const points = data.soldierDischarge === 'combat' ? 3.0 : 2.0;
+    // גבר: 23+ חודשים = 2 נקודות, 12-22 חודשים = 1 נקודה
+    // אישה: 22+ חודשים = 2 נקודות, 12-21 חודשים = 1 נקודה
+    // שירות לאומי מלא (24 חודשים) = 2 נקודות
+    // הקוד מניח שירות מלא = 2 נקודות (מקסימום חוקי)
+    const points = 2.0; // מקסימום לפי חוק — 2 נקודות זיכוי (תוקן מ-3.0 שהיה שגוי)
     const soldierRefund = Math.round(points * cpAnnual);
-    
+
     reasons.push({
       icon: '🎖️',
-      text: `חייל/ת משוחרר/ת או שירות לאומי (${points.toFixed(1)} נקודות זיכוי)`,
+      text: `חייל/ת משוחרר/ת או שירות לאומי (${points.toFixed(1)} נקודות זיכוי × 36 חודשים)`,
       min: Math.round(soldierRefund * 0.85),
       max: soldierRefund,
       confidence: 0.95,

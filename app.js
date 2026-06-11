@@ -311,6 +311,23 @@ window.openContactModal = function(e) {
     e.preventDefault();
     e.stopPropagation();
   }
+  
+  // Try to pre-fill name/phone if the user already submitted the main form
+  const nameInput = document.getElementById('contact-name');
+  const phoneInput = document.getElementById('contact-phone');
+  const errorDiv = document.getElementById('contact-error');
+  
+  if (errorDiv) errorDiv.style.display = 'none';
+  
+  if (window.lastFormData) {
+    if (nameInput && window.lastFormData.firstName && !nameInput.value) {
+      nameInput.value = window.lastFormData.firstName;
+    }
+    if (phoneInput && window.lastFormData.phone && !phoneInput.value) {
+      phoneInput.value = window.lastFormData.phone;
+    }
+  }
+  
   const modal = document.getElementById('contact-modal');
   if (modal) modal.classList.add('open');
 };
@@ -324,25 +341,61 @@ window.closeContactModal = function(e) {
   if (modal) modal.classList.remove('open');
 };
 
+// Internal validation function
+function getContactInfo() {
+  const nameEl = document.getElementById('contact-name');
+  const phoneEl = document.getElementById('contact-phone');
+  const errorEl = document.getElementById('contact-error');
+  
+  const name = nameEl ? nameEl.value.trim() : '';
+  const phone = phoneEl ? phoneEl.value.trim() : '';
+  
+  // Validation: name at least 2 chars, phone at least 9 chars
+  if (name.length < 2 || phone.length < 9) {
+    if (errorEl) errorEl.style.display = 'block';
+    return null;
+  }
+  
+  if (errorEl) errorEl.style.display = 'none';
+  return { name, phone };
+}
+
 window.openWhatsApp = function(e) {
   if (e) e.preventDefault();
-  const phone = CONFIG.whatsappNumber || '972502196259';
-  const text = encodeURIComponent('שלום רב, ברצוני לפנות לשירות הלקוחות של EZ Tax בנוגע לבדיקת זכאות להחזר מס. אשמח לקבל מענה מנציג. תודה.');
   
-  // Use a universal link that is 100% reliable on all platforms (mobile app and desktop web)
+  const info = getContactInfo();
+  if (!info) return; // Validation failed
+  
+  const phone = CONFIG.whatsappNumber || '972502196259';
+  const text = encodeURIComponent(
+    `שלום רב,\n` +
+    `שמי ${info.name} (טלפון לחזרה: ${info.phone}).\n` +
+    `אני פונה אליכם בעקבות הבדיקה שביצעתי באתר EZ Tax. אשמח שיועץ מס יחזור אליי לקבלת מענה והסבר. תודה.`
+  );
+  
   const url = `https://wa.me/${phone}?text=${text}`;
   window.open(url, '_blank');
+  
+  // Close the modal on success
+  window.closeContactModal();
 };
 
 window.openMailApp = function(e) {
   if (e) e.preventDefault();
+  
+  const info = getContactInfo();
+  if (!info) return; // Validation failed
+  
   const email = 'contact.ez.security@gmail.com';
   const subject = encodeURIComponent('פנייה לשירות הלקוחות - EZ Tax');
   const body = encodeURIComponent(
     'שלום רב,\n\n' +
+    `שם מלא: ${info.name}\n` +
+    `טלפון לחזרה: ${info.phone}\n\n` +
     'אני פונה אליכם בעקבות הבדיקה שביצעתי באתר EZ Tax.\n' +
     'ברצוני לקבל מידע נוסף ולשוחח עם נציג/יועץ מס בנושא:\n\n' +
-    'בברכה,\n'
+    'בברכה,\n' +
+    `${info.name}`
   );
   
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
@@ -375,6 +428,9 @@ window.openMailApp = function(e) {
     // Desktop: Open Gmail Web Compose directly
     window.open(webGmailUrl, '_blank');
   }
+  
+  // Close the modal on success
+  window.closeContactModal();
 };
 
 

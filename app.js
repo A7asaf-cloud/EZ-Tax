@@ -506,6 +506,48 @@ window.openMailApp = function(e) {
   showContactSuccessView();
 };
 
+window.openWhatsAppDirect = function(e) {
+  if (e) e.preventDefault();
+  const phone = CONFIG.whatsappNumber || '972502196259';
+  const text = encodeURIComponent('שלום רב, ברצוני לפנות לשירות הלקוחות של EZ Tax בנוגע לבדיקת זכאות להחזר מס. אשמח לקבל מענה מנציג. תודה.');
+  const url = `https://wa.me/${phone}?text=${text}`;
+  window.open(url, '_blank');
+};
+
+window.openMailAppDirect = function(e) {
+  if (e) e.preventDefault();
+  const email = 'contact.ez.security@gmail.com';
+  const subject = encodeURIComponent('פנייה לשירות הלקוחות - EZ Tax');
+  const body = encodeURIComponent(
+    'שלום רב,\n\n' +
+    'אני פונה אליכם בעקבות הבדיקה שביצעתי באתר EZ Tax. אשמח שנציג שירות יחזור אליי לקבלת מענה והסבר.\n\n' +
+    'בברכה,\n'
+  );
+  
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const isAndroid = /Android/i.test(navigator.userAgent);
+  const webGmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${subject}&body=${body}`;
+  
+  if (isIOS || isAndroid) {
+    const gmailUrl = `googlegmail:///co?to=${email}&subject=${subject}&body=${body}`;
+    let redirected = false;
+    const handleVisibilityChange = () => { redirected = true; };
+    window.addEventListener('pagehide', handleVisibilityChange, { once: true });
+    window.addEventListener('blur', handleVisibilityChange, { once: true });
+    
+    window.location.href = gmailUrl;
+    setTimeout(() => {
+      window.removeEventListener('pagehide', handleVisibilityChange);
+      window.removeEventListener('blur', handleVisibilityChange);
+      if (!redirected) {
+        window.open(webGmailUrl, '_blank');
+      }
+    }, 1200);
+  } else {
+    window.open(webGmailUrl, '_blank');
+  }
+};
+
 
 
 

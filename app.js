@@ -2018,7 +2018,7 @@ async function sendEmailReport() {
   // Build clean text docs checklist for plain text email client
   const docsTextList = r.docs.map((doc, idx) => `${idx + 1}. ${doc.text} (${doc.priority === 'critical' ? 'חובה' : doc.priority === 'important' ? 'חשוב' : 'אופציונלי'})`);
   const docsText = docsTextList.join('\n');
-  const docsHtml = r.docs.map((doc, idx) => `<div style="margin:6px 0;">${idx + 1}. ${doc.text} <strong style="font-size:0.8em;color:${doc.priority === 'critical' ? '#ef4444' : '#f59e0b'}">(${doc.priority === 'critical' ? 'חובה' : doc.priority === 'important' ? 'חשוב' : 'אופציונלי'})</strong></div>`).join('');
+  const docsHtml = r.docs.map((doc, idx) => `${idx + 1}. ${doc.text} (${doc.priority === 'critical' ? 'חובה' : doc.priority === 'important' ? 'חשוב' : 'אופציונלי'})`).join('<br>');
 
   // 2. שלח ללקוח דרך EmailJS (אוטומטי, ללא חלוניות)
   if (CONFIG.emailjsServiceId && CONFIG.emailjsTemplateId && CONFIG.emailjsPublicKey && typeof emailjs !== 'undefined') {

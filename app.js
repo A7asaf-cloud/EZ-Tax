@@ -2007,7 +2007,7 @@ function resetForm() {
 
 
 // ─── SEND EMAIL REPORT TO CLIENT ──────────────────────────────
-function sendEmailReport() {
+async function sendEmailReport() {
   const r = window.lastResult;
   const d = window.lastFormData;
   if (!r) return;
@@ -2030,11 +2030,28 @@ function sendEmailReport() {
   const formFilename = FORM_135_FILES[d.taxYear] || FORM_135_FILES[2025];
   const formUrl = window.location.origin + '/All%20Attachments/' + formFilename;
 
+  // Fetch file and convert to base64 for direct email attachment
+  let base64Attachment = '';
+  try {
+    const res = await fetch(formUrl);
+    if (res.ok) {
+      const blob = await res.blob();
+      base64Attachment = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    }
+  } catch (err) {
+    console.warn("Could not fetch Form 135 PDF for attachment:", err);
+  }
+
   const reasonsText = r.reasons.map((x, idx) => `${idx + 1}. ${x.text}`).join('\n');
   
-  // Dynamically build legally compliant official document checklist based on client profile flags
+  // Dynamically build legally compliant official document checklist based on client profile flags (without crappy download link)
   const checklistItems = [
-    `טופס 135 רשמי לשנת ${d.taxYear} (להורדה ומילוי: ${formUrl} ) - חובה למלא, לחתום ולהחזיר אלינו.`,
+    `טופס 135 רשמי ומלא לשנת ${d.taxYear} (מצורף למייל זה - נא למלא ולחתום).`,
     "טופס 106 מקורי ומלא מכל המעסיקים עבור אותן שנים.",
     "אישור ניהול חשבון בנק או צילום צ'ק (חובה על פי חוק לצורך העברת הזיכוי ישירות לחשבון)."
   ];
@@ -2078,7 +2095,8 @@ function sendEmailReport() {
       reasons: reasonsText,
       documents: docsText,
       client_phone: d.phone,
-      uploaded_files: filesListText
+      uploaded_files: filesListText,
+      form_135_attachment: base64Attachment // Variable attachment parameter for EmailJS
     };
 
     emailjs.send(CONFIG.emailjsServiceId, CONFIG.emailjsTemplateId, emailParams)
@@ -2089,7 +2107,7 @@ function sendEmailReport() {
     .catch((err) => {
       console.error('❌ EmailJS error:', err);
       alert(`שגיאה משירות המייל (EmailJS): ${err.text || err.message || JSON.stringify(err)}\n\nפרטי השליחה:\n- אימייל לקוח: "${emailTo}"\n- שם לקוח: "${name}"\n\n(אם המייל נכון, הבעיה היא שהגדרת "To Email" בתבנית ב-EmailJS ריקה או שגויה)`);
-      openMailtoFallback(emailTo, name, d.taxYear, r, reasonsText, docsText, formUrl);
+      openMailtoFallback(emailTo, name, d.taxYear, r, reasonsText, docsText);
     });
   } else {
     let reason = "";
@@ -2100,11 +2118,11 @@ function sendEmailReport() {
     
     console.warn('EmailJS fallback active. Reason:', reason);
     alert(`שליחה אוטומטית נכשלה ועוברת לגיבוי ידני.\nסיבה: ${reason}\n\nפרטי השליחה:\n- אימייל לקוח: "${emailTo}"\n\n(נלחץ על אישור כדי לפתוח את תוכנת המייל הידנית)`);
-    openMailtoFallback(emailTo, name, d.taxYear, r, reasonsText, docsText, formUrl);
+    openMailtoFallback(emailTo, name, d.taxYear, r, reasonsText, docsText);
   }
 }
 
-function openMailtoFallback(emailTo, name, taxYear, r, reasonsText, docsText, formUrl) {
+function openMailtoFallback(emailTo, name, taxYear, r, reasonsText, docsText) {
   const d = window.lastFormData;
   const clientId = d ? `${d.phone ? d.phone.slice(-4) : ''}-${Date.now().toString().slice(-4)}` : Date.now().toString().slice(-6);
   const subject = encodeURIComponent(`💰 תוצאות בדיקת הזכאות שלך + הטפסים המוכנים להגשה (תיק מס' ${clientId})`);
@@ -2113,7 +2131,7 @@ function openMailtoFallback(emailTo, name, taxYear, r, reasonsText, docsText, fo
     `שלום ${name},\n\n` +
     `אנו שמחים לעדכן כי בדיקת הזכאות שלך בפלטפורמת EZ-Tax הושלמה בהצלחה. על פי הנתונים שהזנת, סכום החזר המס המשוער שלך עבור שנת המס ${taxYear} עומד על כ-₪${r.refundMin.toLocaleString('he-IL')} – ₪${r.refundMax.toLocaleString('he-IL')}.\n\n` +
     `בהתאם לסעיף 160 לפקודת מס הכנסה, כל אזרח זכאי לקבל החזר על מס ששולם ביתר בתוספת ריבית והפרשי הצמדה כחוק.\n\n` +
-    `אנא הורד את טופס 135 הרשמי לשנת ${taxYear} שהכנו עבורך בקישור הבא, מלא אותו, חתום עליו והחזר אותו אלינו (במייל חוזר או בוואטסאפ) לצורך הגשת הדו"ח:\n${formUrl}\n\n` +
+    `טופס 135 הרשמי לשנת ${taxYear} מצורף למייל זה שנשלח אליך. אנא מלא אותו, חתום עליו והחזר אותו אלינו (במייל חוזר או בוואטסאפ) לצורך הגשת הדו"ח.\n\n` +
     `לאחר חתימתך והעלאת המסמכים המלווים הנדרשים, התיק ייבדק על ידי נציג שירות מקצועי וישודר ישירות לרשות המסים. כספי ההחזר יועברו ישירות לחשבון הבנק שלך בתוך 30 עד 90 ימים ממועד קליטת התיק במשרדי שומה.\n\n` +
     `לנוחיותך, להלן רשימת המסמכים שיש לצרף לתיק לצורך הגשתו:\n` +
     `${docsText}\n\n` +

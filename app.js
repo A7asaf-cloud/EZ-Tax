@@ -1413,7 +1413,7 @@ function runCalculation(data) {
   // 8. DISCHARGED SOLDIER / NATIONAL SERVICE
   if (data.soldierDischarge && data.soldierDischarge !== 'no') {
     const cpAnnual = rules.creditPointValueAnnual || 2904;
-    const points = data.soldierDischarge === 'combat' ? 3.0 : 1.0;
+    const points = data.soldierDischarge === 'combat' ? 3.0 : 2.0;
     const soldierRefund = Math.round(points * cpAnnual);
     
     reasons.push({

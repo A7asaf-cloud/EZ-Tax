@@ -1,0 +1,9 @@
+{
+  "name": "ez-tax-calculator",
+  "version": "1.0.0",
+  "description": "EZ Tax Calculator Engine + Serverless Mailer",
+  "main": "app.js",
+  "dependencies": {
+    "nodemailer": "^6.9.13"
+  }
+}

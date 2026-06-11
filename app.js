@@ -2018,35 +2018,6 @@ async function sendEmailReport() {
   // 1. שלח ליועץ ברקע (Web3Forms)
   submitLeadByEmail(r, d);
 
-  const FORM_135_FILES = {
-    2020: 'Service_Pages_Income_tax_annual-report-2020_135%20-%202020.pdf',
-    2021: 'Service_Pages_Income_tax_annual-report-2021_135%20-%202021.pdf',
-    2022: 'Service_Pages_Income_tax_annual-report-2022_annual-singular-report-2022_135-2022.pdf',
-    2023: 'Service_Pages_Income_tax_annual-report-2023_135-2023.pdf',
-    2024: 'Service_Pages_Income_tax_annual-report-2024_135-2024.pdf',
-    2025: 'Service_Pages_Income_tax_annual-report-2026_itc135-2025.pdf'
-  };
-
-  const formFilename = FORM_135_FILES[d.taxYear] || FORM_135_FILES[2025];
-  const formUrl = window.location.origin + '/All%20Attachments/' + formFilename;
-
-  // Fetch file and convert to base64 for direct email attachment
-  let base64Attachment = '';
-  try {
-    const res = await fetch(formUrl);
-    if (res.ok) {
-      const blob = await res.blob();
-      base64Attachment = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result.split(',')[1]);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-    }
-  } catch (err) {
-    console.warn("Could not fetch Form 135 PDF for attachment:", err);
-  }
-
   const reasonsText = r.reasons.map((x, idx) => `${idx + 1}. ${x.text}`).join('\n');
   
   // Dynamically build legally compliant official document checklist based on client profile flags (without crappy download link)
@@ -2074,52 +2045,43 @@ async function sendEmailReport() {
   
   const docsText = checklistItems.map((item, idx) => `${idx + 1}. ${item}`).join('\n');
 
-  console.log('✉️ Attempting automatic send via EmailJS to:', emailTo, { name, taxYear: d.taxYear });
+  console.log('✉️ Attempting automatic send via Vercel Serverless Function to:', emailTo, { name, taxYear: d.taxYear });
+  showEmailSendingBadge();
 
-  const filesListText = uploadedFiles.length > 0 ? uploadedFiles.map(f => f.name).join(', ') : 'לא הועלו קבצים';
-
-  // 2. שלח ללקוח (EmailJS או Mailto)
-  if (CONFIG.emailjsServiceId && CONFIG.emailjsTemplateId && CONFIG.emailjsPublicKey && typeof emailjs !== 'undefined') {
-    showEmailSendingBadge();
-    
-    const emailParams = {
-      to_email: emailTo,
-      email: emailTo, // תאימות מלאה אם הוגדר {{email}} במקום {{to_email}} בתבנית
-      to_name: name,
-      name: name,     // תאימות מלאה
-      tax_year: d.taxYear,
-      score: r.eligibilityScore,
-      refund_min: r.refundMin.toLocaleString('he-IL'),
-      refund_max: r.refundMax.toLocaleString('he-IL'),
-      probability: r.probability,
-      reasons: reasonsText,
-      documents: docsText,
-      client_phone: d.phone,
-      uploaded_files: filesListText,
-      form_135_attachment: base64Attachment // Variable attachment parameter for EmailJS
-    };
-
-    emailjs.send(CONFIG.emailjsServiceId, CONFIG.emailjsTemplateId, emailParams)
-    .then(() => {
-      console.log('✅ Email sent successfully via EmailJS');
-      showEmailSentToClientBadge();
-    })
-    .catch((err) => {
-      console.error('❌ EmailJS error:', err);
-      alert(`שגיאה משירות המייל (EmailJS): ${err.text || err.message || JSON.stringify(err)}\n\nפרטי השליחה:\n- אימייל לקוח: "${emailTo}"\n- שם לקוח: "${name}"\n\n(אם המייל נכון, הבעיה היא שהגדרת "To Email" בתבנית ב-EmailJS ריקה או שגויה)`);
-      openMailtoFallback(emailTo, name, d.taxYear, r, reasonsText, docsText);
+  try {
+    const response = await fetch('/api/send-email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        emailTo: emailTo,
+        name: name,
+        taxYear: d.taxYear,
+        score: r.eligibilityScore,
+        refundMin: r.refundMin.toLocaleString('he-IL'),
+        refundMax: r.refundMax.toLocaleString('he-IL'),
+        probability: r.probability,
+        reasons: reasonsText,
+        documents: docsText
+      })
     });
-  } else {
-    let reason = "";
-    if (!CONFIG.emailjsServiceId) reason += "חסר Service ID. ";
-    if (!CONFIG.emailjsTemplateId) reason += "חסר Template ID. ";
-    if (!CONFIG.emailjsPublicKey) reason += "חסר Public Key. ";
-    if (typeof emailjs === 'undefined') reason += "הסקריפט של EmailJS לא נטען בדפנפן (ייתכן שנחסם ע\"י חוסם פרסומות/AdBlocker או בעיית אינטרנט). ";
-    
-    console.warn('EmailJS fallback active. Reason:', reason);
-    alert(`שליחה אוטומטית נכשלה ועוברת לגיבוי ידני.\nסיבה: ${reason}\n\nפרטי השליחה:\n- אימייל לקוח: "${emailTo}"\n\n(נלחץ על אישור כדי לפתוח את תוכנת המייל הידנית)`);
+
+    const result = await response.json();
+    if (response.ok && result.success) {
+      console.log('✅ Email sent successfully via Vercel Backend');
+      showEmailSentToClientBadge();
+    } else {
+      console.error('❌ Backend Email send error:', result.error);
+      alert(`שגיאה בשליחת המייל: ${result.error || 'שגיאה לא ידועה'}\nעובר לשליחה ידנית.`);
+      openMailtoFallback(emailTo, name, d.taxYear, r, reasonsText, docsText);
+    }
+  } catch (err) {
+    console.error('❌ Network error sending email:', err);
+    alert(`שגיאת תקשורת בשליחת המייל: ${err.message || err}\nעובר לשליחה ידנית.`);
     openMailtoFallback(emailTo, name, d.taxYear, r, reasonsText, docsText);
   }
+}
 }
 
 function openMailtoFallback(emailTo, name, taxYear, r, reasonsText, docsText) {

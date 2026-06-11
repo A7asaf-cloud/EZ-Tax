@@ -306,26 +306,38 @@ function initNavbar() {
 
 
 // ─── CONTACT MODAL CONTROLS ──────────────────────────────────
+// ─── CONTACT MODAL CONTROLS ──────────────────────────────────
 window.openContactModal = function(e) {
   if (e) {
     e.preventDefault();
     e.stopPropagation();
   }
   
-  // Try to pre-fill name/phone if the user already submitted the main form
+  // Show form, hide success view
+  const formContainer = document.getElementById('contact-form-container');
+  const successContainer = document.getElementById('contact-success-container');
+  if (formContainer) formContainer.style.display = 'block';
+  if (successContainer) successContainer.style.display = 'none';
+  
   const nameInput = document.getElementById('contact-name');
   const phoneInput = document.getElementById('contact-phone');
+  const messageInput = document.getElementById('contact-message');
   const errorDiv = document.getElementById('contact-error');
   
   if (errorDiv) errorDiv.style.display = 'none';
+  if (messageInput) messageInput.value = '';
   
+  // Try to pre-fill name/phone if the user already submitted the main form
   if (window.lastFormData) {
-    if (nameInput && window.lastFormData.firstName && !nameInput.value) {
+    if (nameInput && window.lastFormData.firstName) {
       nameInput.value = window.lastFormData.firstName;
     }
-    if (phoneInput && window.lastFormData.phone && !phoneInput.value) {
+    if (phoneInput && window.lastFormData.phone) {
       phoneInput.value = window.lastFormData.phone;
     }
+  } else {
+    if (nameInput) nameInput.value = '';
+    if (phoneInput) phoneInput.value = '';
   }
   
   const modal = document.getElementById('contact-modal');
@@ -345,10 +357,12 @@ window.closeContactModal = function(e) {
 function getContactInfo() {
   const nameEl = document.getElementById('contact-name');
   const phoneEl = document.getElementById('contact-phone');
+  const messageEl = document.getElementById('contact-message');
   const errorEl = document.getElementById('contact-error');
   
   const name = nameEl ? nameEl.value.trim() : '';
   const phone = phoneEl ? phoneEl.value.trim() : '';
+  const message = messageEl ? messageEl.value.trim() : '';
   
   // Validation: name at least 2 chars, phone at least 9 chars
   if (name.length < 2 || phone.length < 9) {
@@ -357,7 +371,14 @@ function getContactInfo() {
   }
   
   if (errorEl) errorEl.style.display = 'none';
-  return { name, phone };
+  return { name, phone, message };
+}
+
+function showContactSuccessView() {
+  const formContainer = document.getElementById('contact-form-container');
+  const successContainer = document.getElementById('contact-success-container');
+  if (formContainer) formContainer.style.display = 'none';
+  if (successContainer) successContainer.style.display = 'block';
 }
 
 window.openWhatsApp = function(e) {
@@ -367,17 +388,19 @@ window.openWhatsApp = function(e) {
   if (!info) return; // Validation failed
   
   const phone = CONFIG.whatsappNumber || '972502196259';
-  const text = encodeURIComponent(
-    `שלום רב,\n` +
-    `שמי ${info.name} (טלפון לחזרה: ${info.phone}).\n` +
-    `אני פונה אליכם בעקבות הבדיקה שביצעתי באתר EZ Tax. אשמח שנציג יחזור אליי לקבלת מענה והסבר. תודה.`
-  );
   
+  let msgBody = `שלום רב,\nשמי ${info.name} (טלפון לחזרה: ${info.phone}).\nאני פונה אליכם בעקבות הבדיקת זכאות להחזר מס שביצעתי באתר EZ Tax. אשמח שנציג יחזור אליי לקבלת מענה והסבר.`;
+  if (info.message) {
+    msgBody += `\n\nפירוט הפנייה שלי:\n${info.message}`;
+  }
+  msgBody += `\n\nתודה.`;
+  
+  const text = encodeURIComponent(msgBody);
   const url = `https://wa.me/${phone}?text=${text}`;
   window.open(url, '_blank');
   
-  // Close the modal on success
-  window.closeContactModal();
+  // Show success auto-reply view on screen
+  showContactSuccessView();
 };
 
 window.openMailApp = function(e) {
@@ -388,15 +411,19 @@ window.openMailApp = function(e) {
   
   const email = 'contact.ez.security@gmail.com';
   const subject = encodeURIComponent('פנייה לשירות הלקוחות - EZ Tax');
-  const body = encodeURIComponent(
-    'שלום רב,\n\n' +
+  
+  let mailBody = 'שלום רב,\n\n' +
     `שם מלא: ${info.name}\n` +
     `טלפון לחזרה: ${info.phone}\n\n` +
-    'אני פונה אליכם בעקבות הבדיקה שביצעתי באתר EZ Tax. אשמח שנציג שירות יחזור אליי לקבלת מענה והסבר.\n\n' +
-    'בברכה,\n' +
-    `${info.name}`
-  );
+    'אני פונה אליכם בעקבות הבדיקה שביצעתי באתר EZ Tax. אשמח שנציג שירות יחזור אליי לקבלת מענה והסבר.';
+    
+  if (info.message) {
+    mailBody += `\n\nפירוט הפנייה:\n${info.message}`;
+  }
   
+  mailBody += `\n\nבברכה,\n${info.name}`;
+  
+  const body = encodeURIComponent(mailBody);
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   const isAndroid = /Android/i.test(navigator.userAgent);
   
@@ -428,8 +455,8 @@ window.openMailApp = function(e) {
     window.open(webGmailUrl, '_blank');
   }
   
-  // Close the modal on success
-  window.closeContactModal();
+  // Show success auto-reply view on screen
+  showContactSuccessView();
 };
 
 

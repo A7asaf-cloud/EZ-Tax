@@ -2,3 +2,10 @@
 index_decoded.html
 index_recovered.html
 index_repaired.html
+
+# Backend settings and modules
+.env
+node_modules/
+uploads/
+completed_cases/
+

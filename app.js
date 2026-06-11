@@ -1,7 +1,7 @@
 /* =============================================
    TaxOS — Tax Calculation Engine + UI Logic
    ============================================= */
-console.log("🚀 EZ Tax — Code Version 3.1 Loaded — Diagnostics Active");
+console.log("🚀 EZ Tax — Code Version 3.2 Loaded — Diagnostics Active");
 
 // ─── הגדרות אישיות — שנה כאן בלבד! ─────────────────────────────
 const CONFIG = {
@@ -945,10 +945,29 @@ function renderDocsChecklist() {
     const el = document.createElement('div');
     el.className = `doc-check-item ${doc.priority}`;
     const badgeText = { critical: 'חובה', important: 'חשוב', optional: 'אופציונלי' };
+    
+    let docTextHtml = doc.text;
+    if (doc.text.includes('טופס 135 רשמי לשנת')) {
+      const match = doc.text.match(/(https?:\/\/[^\s\)]+)/);
+      if (match) {
+        const url = match[1];
+        const yearMatch = doc.text.match(/לשנת (\d+)/);
+        const docYear = yearMatch ? yearMatch[1] : '';
+        docTextHtml = `<a href="${url}" target="_blank" style="color:#60a5fa; text-decoration:underline; font-weight:bold;">טופס 135 רשמי לשנת ${docYear}</a> - חובה למלא, לחתום ולהחזיר אלינו.`;
+      }
+    } else {
+      const urlRegex = /(https?:\/\/[^\s\)]+)/g;
+      if (urlRegex.test(doc.text)) {
+        docTextHtml = doc.text.replace(urlRegex, (url) => {
+          return `<a href="${url}" target="_blank" style="color:#60a5fa; text-decoration:underline; font-weight:bold;">לחץ כאן להורדה</a>`;
+        });
+      }
+    }
+
     el.innerHTML = `
       <label class="checkbox-container" style="display:flex; align-items:center; width:100%; margin-bottom: 8px;">
         <input type="checkbox" checked disabled style="margin-left: 10px;" />
-        <span>${doc.text}</span>
+        <span>${docTextHtml}</span>
         <span class="doc-badge ${doc.priority}" style="margin-right:auto; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700;">${badgeText[doc.priority]}</span>
       </label>
     `;
@@ -1278,9 +1297,9 @@ function runCalculation(data) {
     totalRefundMin += Math.round(refundEst * 0.5);
     totalRefundMax += Math.round(refundEst * 1.5);
     eligibilityScore += 25;
-    docs.push({ text: `טופס 106 מכל מעסיק (${numEmployers} טפסים)`, priority: 'critical' });
+    docs.push({ text: `טופס 106 מקורי ומלא מכל המעסיקים (${numEmployers} מעסיקים) עבור אותן שנים`, priority: 'critical' });
   } else {
-    docs.push({ text: 'טופס 106 ממעסיקך', priority: 'critical' });
+    docs.push({ text: 'טופס 106 מקורי ומלא ממעסיקך עבור אותן שנים', priority: 'critical' });
   }
 
   // 3. RESERVE DUTY — 2026: שיטת נקודות זיכוי חדשה ללוחמים (הוראת שעה)
@@ -1441,7 +1460,7 @@ function runCalculation(data) {
     totalRefundMin += Math.round(soldierRefund * 0.85);
     totalRefundMax += soldierRefund;
     eligibilityScore += 20;
-    docs.push({ text: 'תעודת שחרור מצה"ל / אישור סיום שירות לאומי', priority: 'critical' });
+    docs.push({ text: 'תעודת שחרור מצה"ל / שירות לאומי לצורך חישוב נקודות זיכוי', priority: 'critical' });
   }
 
   // 9. ACADEMIC DEGREE / PROFESSIONAL CERTIFICATE COMPLETION
@@ -1480,13 +1499,23 @@ function runCalculation(data) {
   }
 
   // ── STANDARD DOCS (always needed) ──
-  const cleanFormUrl = `https://ez-tax-one.vercel.app/All%20Attachments/tax-form-135-${year}.pdf`;
+  const form135Files = {
+    2020: 'Service_Pages_Income_tax_annual-report-2020_135%20-%202020.pdf',
+    2021: 'Service_Pages_Income_tax_annual-report-2021_135%20-%202021.pdf',
+    2022: 'Service_Pages_Income_tax_annual-report-2022_annual-singular-report-2022_135-2022.pdf',
+    2023: 'Service_Pages_Income_tax_annual-report-2023_135-2023.pdf',
+    2024: 'Service_Pages_Income_tax_annual-report-2024_135-2024.pdf',
+    2025: 'Service_Pages_Income_tax_annual-report-2026_itc135-2025.pdf'
+  };
+  const form135File = form135Files[year] || `tax-form-135-${year}.pdf`;
+  const cleanFormUrl = `https://ez-tax-one.vercel.app/All%20Attachments/${form135File}`;
+
   docs.push({ 
-    text: `טופס 135 הרשמי לשנת ${year} (להורדה ישירה: ${cleanFormUrl})`, 
+    text: `טופס 135 רשמי לשנת ${year} (להורדה ומילוי: ${cleanFormUrl}) - חובה למלא, לחתום ולהחזיר אלינו.`, 
     priority: 'critical' 
   });
   docs.push({ text: 'תעודת זהות (ספח)', priority: 'critical' });
-  docs.push({ text: 'אישור ניהול חשבון בנק', priority: 'critical' });
+  docs.push({ text: "אישור ניהול חשבון בנק או צילום צ'ק (חובה על פי חוק לצורך העברת הזיכוי ישירות לחשבון)", priority: 'critical' });
 
   // ── RISKS ──
   const extraIncomes = Array.isArray(data.extraIncome) ? data.extraIncome : [data.extraIncome];
@@ -1749,11 +1778,21 @@ function showResults(result) {
 
     // Dynamically detect URLs and convert to styled links
     let docTextHtml = doc.text;
-    const urlRegex = /(https?:\/\/[^\s\)]+)/g;
-    if (urlRegex.test(doc.text)) {
-      docTextHtml = doc.text.replace(urlRegex, (url) => {
-        return `<a href="${url}" target="_blank" style="color:#60a5fa; text-decoration:underline; font-weight:bold;">לחץ כאן להורדה</a>`;
-      });
+    if (doc.text.includes('טופס 135 רשמי לשנת')) {
+      const match = doc.text.match(/(https?:\/\/[^\s\)]+)/);
+      if (match) {
+        const url = match[1];
+        const yearMatch = doc.text.match(/לשנת (\d+)/);
+        const docYear = yearMatch ? yearMatch[1] : '';
+        docTextHtml = `<a href="${url}" target="_blank" style="color:#60a5fa; text-decoration:underline; font-weight:bold;">טופס 135 רשמי לשנת ${docYear}</a> - חובה למלא, לחתום ולהחזיר אלינו.`;
+      }
+    } else {
+      const urlRegex = /(https?:\/\/[^\s\)]+)/g;
+      if (urlRegex.test(doc.text)) {
+        docTextHtml = doc.text.replace(urlRegex, (url) => {
+          return `<a href="${url}" target="_blank" style="color:#60a5fa; text-decoration:underline; font-weight:bold;">לחץ כאן להורדה</a>`;
+        });
+      }
     }
 
     el.innerHTML = `
@@ -2041,11 +2080,21 @@ async function sendEmailReport() {
   // Build HTML docs checklist converting URLs to clean anchor links
   const docsHtmlList = r.docs.map((doc, idx) => {
     let cleanText = doc.text.replace(/<[^>]*>/g, '');
-    const urlRegex = /(https?:\/\/[^\s\)]+)/g;
-    if (urlRegex.test(cleanText)) {
-      cleanText = cleanText.replace(urlRegex, (url) => {
-        return `<a href="${url}" target="_blank">לחץ כאן להורדה</a>`;
-      });
+    if (cleanText.includes('טופס 135 רשמי לשנת')) {
+      const match = cleanText.match(/(https?:\/\/[^\s\)]+)/);
+      if (match) {
+        const url = match[1];
+        const yearMatch = cleanText.match(/לשנת (\d+)/);
+        const docYear = yearMatch ? yearMatch[1] : '';
+        cleanText = `<a href="${url}" target="_blank">טופס 135 רשמי לשנת ${docYear}</a> - חובה למלא, לחתום ולהחזיר אלינו.`;
+      }
+    } else {
+      const urlRegex = /(https?:\/\/[^\s\)]+)/g;
+      if (urlRegex.test(cleanText)) {
+        cleanText = cleanText.replace(urlRegex, (url) => {
+          return `<a href="${url}" target="_blank">לחץ כאן להורדה</a>`;
+        });
+      }
     }
     return `${idx + 1}. ${cleanText} (${doc.priority === 'critical' ? 'חובה' : doc.priority === 'important' ? 'חשוב' : 'אופציונלי'})`;
   });

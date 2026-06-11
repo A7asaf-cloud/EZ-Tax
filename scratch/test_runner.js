@@ -19,7 +19,7 @@ function runUnitTests() {
     const versionMatchApp = appJs.match(/Code Version (\d+\.\d+)/);
     const versionMatchHtml = indexHtml.match(/id="app-version"[^>]*>v(\d+\.\d+)/);
 
-    if (versionMatchApp && versionMatchHtml && versionMatchApp[1] === versionMatchHtml[1] && versionMatchApp[1] === '3.1') {
+    if (versionMatchApp && versionMatchHtml && versionMatchApp[1] === versionMatchHtml[1] && versionMatchApp[1] === '3.2') {
       console.log(`✅ TEST 1: Version match passed. Current version tracked: v${versionMatchApp[1]}`);
       passed++;
     } else {

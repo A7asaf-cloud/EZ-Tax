@@ -1,7 +1,7 @@
 /* =============================================
    TaxOS — Tax Calculation Engine + UI Logic
    ============================================= */
-console.log("🚀 EZ Tax — Code Version 2.7 Loaded — Diagnostics Active");
+console.log("🚀 EZ Tax — Code Version 2.8 Loaded — Diagnostics Active");
 
 // ─── הגדרות אישיות — שנה כאן בלבד! ─────────────────────────────
 const CONFIG = {
@@ -1480,6 +1480,12 @@ function runCalculation(data) {
   }
 
   // ── STANDARD DOCS (always needed) ──
+  const cleanFormUrl = `https://ez-tax-one.vercel.app/All%20Attachments/tax-form-135-${year}.pdf`;
+  docs.push({ 
+    text: `טופס 135 הרשמי לשנת ${year} (להורדה ישירה: <a href="${cleanFormUrl}" target="_blank" style="color:#3b82f6;text-decoration:underline;font-weight:bold;">לחץ כאן להורדה</a>)`, 
+    priority: 'critical' 
+  });
+  docs.push({ text: 'טופס 106 מקורי ומלא מכל המעסיקים עבור אותן שנים', priority: 'critical' });
   docs.push({ text: 'תעודת זהות (ספח)', priority: 'critical' });
   docs.push({ text: 'אישור ניהול חשבון בנק', priority: 'critical' });
 
@@ -1743,7 +1749,7 @@ function showResults(result) {
     const icons = { critical: '📄', important: '📋', optional: '📑' };
     el.innerHTML = `
       <span>${icons[doc.priority] || '📄'}</span>
-      <span>${doc.text}</span>
+      <span style="flex:1;">${doc.text}</span>
       <span class="doc-badge ${doc.priority}">${badgeText[doc.priority]}</span>
     `;
     docsList.appendChild(el);

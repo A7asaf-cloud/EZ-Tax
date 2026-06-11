@@ -1136,33 +1136,62 @@ function getMarginalRate(income, brackets) {
 function calculateCreditPoints(data, rules) {
   // Base points: 2.25 for men, 2.75 for women
   let points = (data.gender === 'female') ? 2.75 : 2.25;
+  const isFemale = (data.gender === 'female');
+  const year = data.taxYear || 2025;
 
   // Children
   if (data.hasChildren === 'yes') {
     let childPoints = 0;
-    const isFemale = (data.gender === 'female');
-    const youngestAge = data.youngestChildAge; // '0-5', '6-13', '14-17', '18+'
+    const youngestAgeGroup = data.youngestChildAge; // '0-5', '6-13', '14-17', '18+'
     const count = Math.min(data.childrenCount, 8); // clamp to 8 children max
 
-    if (data.taxYear >= 2024) {
-      // 2024-2026 Rules (Family Credit Points Reform)
-      if (youngestAge === '0-5') {
-        childPoints = 3.0 * count; // Average of 3.0 points per child for both father and mother
-      } else if (youngestAge === '6-13' || youngestAge === '14-17') {
-        childPoints = (isFemale ? 2.0 : 1.0) * count;
-      } else if (youngestAge === '18+') {
-        childPoints = (isFemale ? 0.5 : 0.0) * count;
-      }
-    } else {
-      // 2020-2023 Rules
-      if (youngestAge === '0-5') {
-        childPoints = (isFemale ? 1.5 : 0.75) * count;
-      } else if (youngestAge === '6-13') {
-        childPoints = (isFemale ? 1.0 : 0.5) * count;
-      } else if (youngestAge === '14-17') {
-        childPoints = (isFemale ? 1.0 : 0.0) * count;
-      } else if (youngestAge === '18+') {
-        childPoints = (isFemale ? 0.5 : 0.0) * count;
+    // Estimate representative age for youngest child
+    let baseAge = 2;
+    if (youngestAgeGroup === '6-13') baseAge = 8;
+    else if (youngestAgeGroup === '14-17') baseAge = 15;
+    else if (youngestAgeGroup === '18+') baseAge = 18;
+
+    for (let i = 0; i < count; i++) {
+      const estimatedAge = baseAge + (i * 3);
+      
+      // Calculate points for this child based on estimatedAge, isFemale, and year
+      if (year >= 2024) {
+        if (estimatedAge === 0) {
+          childPoints += 2.5;
+        } else if (estimatedAge >= 1 && estimatedAge <= 2) {
+          childPoints += 4.5;
+        } else if (estimatedAge === 3) {
+          childPoints += 3.5;
+        } else if (estimatedAge >= 4 && estimatedAge <= 5) {
+          childPoints += 2.5;
+        } else if (estimatedAge >= 6 && estimatedAge <= 17) {
+          childPoints += isFemale ? 2.0 : 1.0;
+        } else if (estimatedAge === 18) {
+          childPoints += isFemale ? 0.5 : 0.0;
+        }
+      } else if (year === 2022 || year === 2023) {
+        if (estimatedAge === 0) {
+          childPoints += 1.5;
+        } else if (estimatedAge >= 1 && estimatedAge <= 5) {
+          childPoints += 2.5;
+        } else if (estimatedAge >= 6 && estimatedAge <= 12) {
+          childPoints += isFemale ? 2.0 : 1.0; // 6-12 extra point temporary order
+        } else if (estimatedAge >= 13 && estimatedAge <= 17) {
+          childPoints += isFemale ? 1.0 : 0.0;
+        } else if (estimatedAge === 18) {
+          childPoints += isFemale ? 0.5 : 0.0;
+        }
+      } else {
+        // 2020 - 2021
+        if (estimatedAge === 0) {
+          childPoints += 1.5;
+        } else if (estimatedAge >= 1 && estimatedAge <= 5) {
+          childPoints += 2.5;
+        } else if (estimatedAge >= 6 && estimatedAge <= 17) {
+          childPoints += isFemale ? 1.0 : 0.0;
+        } else if (estimatedAge === 18) {
+          childPoints += isFemale ? 0.5 : 0.0;
+        }
       }
     }
     points += childPoints;
@@ -1461,6 +1490,43 @@ function runCalculation(data) {
     risks.push('הכנסה גבוהה — יש לבדוק חבות מס נוספת');
   }
 
+  // ── TAX CAPPING ──
+  const grossTax = calculateTax(income, year);
+  const basePointsValue = (data.gender === 'female' ? 2.75 : 2.25) * (rules.creditPointValueAnnual || 2820);
+  let estimatedTaxPaid = Math.max(grossTax - basePointsValue, 0);
+
+  // If they have multiple employers, they likely paid extra tax due to lack of tax coordination
+  if (data.employers === '2') {
+    estimatedTaxPaid += income * 0.03;
+  } else if (data.employers === '3+') {
+    estimatedTaxPaid += income * 0.07;
+  }
+  
+  estimatedTaxPaid = Math.round(estimatedTaxPaid);
+
+  if (totalRefundMax > estimatedTaxPaid) {
+    if (estimatedTaxPaid <= 150) {
+      // Virtually no tax paid, refund is 0 or negligible
+      totalRefundMin = 0;
+      totalRefundMax = 0;
+      reasons.forEach(r => {
+        r.min = 0;
+        r.max = 0;
+      });
+      risks.push("גובה המס המשוער ששילמת נמוך מאוד או אפס (מתחת לסף המס), ולכן ההחזר הצפוי הוא ₪0.");
+    } else {
+      // Proportional reduction
+      const ratio = estimatedTaxPaid / totalRefundMax;
+      reasons.forEach(r => {
+        r.min = Math.round(r.min * ratio);
+        r.max = Math.round(r.max * ratio);
+      });
+      totalRefundMin = Math.round(totalRefundMin * ratio);
+      totalRefundMax = estimatedTaxPaid;
+      risks.push("גובה החזר המס הוגבל בהתאם לגובה המס המשוער ששילמת בפועל במהלך השנה.");
+    }
+  }
+
   // ── SCORING ──
   // Add bonus based on estimated refund amount
   if (totalRefundMax > 15000) {
@@ -1474,13 +1540,13 @@ function runCalculation(data) {
   }
 
   eligibilityScore = Math.min(eligibilityScore, 98);
-  if (reasons.length === 0) eligibilityScore = 10;
+  if (reasons.length === 0 || totalRefundMax === 0) eligibilityScore = 10;
 
   // ── PROBABILITY ──
   let probability;
-  if (eligibilityScore >= 70) probability = 'גבוהה מאוד';
-  else if (eligibilityScore >= 50) probability = 'גבוהה';
-  else if (eligibilityScore >= 30) probability = 'בינונית';
+  if (eligibilityScore >= 70 && totalRefundMax > 500) probability = 'גבוהה מאוד';
+  else if (eligibilityScore >= 50 && totalRefundMax > 500) probability = 'גבוהה';
+  else if (eligibilityScore >= 30 && totalRefundMax > 200) probability = 'בינונית';
   else probability = 'נמוכה';
 
   return {

@@ -2082,7 +2082,6 @@ async function sendEmailReport() {
     openMailtoFallback(emailTo, name, d.taxYear, r, reasonsText, docsText);
   }
 }
-}
 
 function openMailtoFallback(emailTo, name, taxYear, r, reasonsText, docsText) {
   const d = window.lastFormData;

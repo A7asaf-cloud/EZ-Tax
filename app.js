@@ -1999,13 +1999,15 @@ async function sendEmailReport() {
   submitLeadByEmail(r, d);
 
   const reasonsText = r.reasons.map((x, idx) => `${idx + 1}. ${x.text}`).join('\n');
-  
+
+  const cleanFormUrl = `https://ez-tax-one.vercel.app/All%20Attachments/tax-form-135-${d.taxYear}.pdf`;
+
   const checklistItems = [
-    `טופס 135 רשמי ומלא לשנת ${d.taxYear} (קישור להורדה מצורף בגוף המייל - נא למלא ולחתום).`,
+    `טופס 135 הרשמי לשנת ${d.taxYear} — קישור להורדה ישירה:\n${cleanFormUrl}\n(נא למלא, לחתום ולהחזיר אלינו)`,
     "טופס 106 מקורי ומלא מכל המעסיקים עבור אותן שנים.",
     "אישור ניהול חשבון בנק או צילום צ'ק (חובה על פי חוק לצורך העברת הזיכוי ישירות לחשבון)."
   ];
-  
+
   if (d.employers === '2' || d.employers === '3+') {
     checklistItems.push("אישור תיאום מס (אם בוצע במהלך השנה) או אסמכתאות על הפסקת עבודה / חל\"ת.");
   }
@@ -2021,34 +2023,58 @@ async function sendEmailReport() {
   if (d.degreeCompleted && d.degreeCompleted !== 'no') {
     checklistItems.push("אישור זכאות לתואר אקדמי או תעודת מקצוע (טופס 219) לקבלת נקודת זיכוי.");
   }
-  
+
   const docsText = checklistItems.map((item, idx) => `${idx + 1}. ${item}`).join('\n');
 
-  showEmailSentToClientBadge();
-  openMailtoFallback(emailTo, name, d.taxYear, r, reasonsText, docsText);
+  // 2. שלח ללקוח דרך EmailJS (אוטומטי, ללא חלוניות)
+  if (CONFIG.emailjsServiceId && CONFIG.emailjsTemplateId && CONFIG.emailjsPublicKey && typeof emailjs !== 'undefined') {
+    showEmailSendingBadge();
+
+    const emailParams = {
+      to_email: emailTo,
+      email: emailTo,
+      to_name: name,
+      name: name,
+      tax_year: d.taxYear,
+      score: r.eligibilityScore,
+      refund_min: r.refundMin.toLocaleString('he-IL'),
+      refund_max: r.refundMax.toLocaleString('he-IL'),
+      probability: r.probability,
+      reasons: reasonsText,
+      documents: docsText,
+      form_135_url: cleanFormUrl
+    };
+
+    emailjs.send(CONFIG.emailjsServiceId, CONFIG.emailjsTemplateId, emailParams)
+      .then(() => {
+        console.log('✅ Email sent via EmailJS');
+        showEmailSentToClientBadge();
+      })
+      .catch((err) => {
+        console.error('❌ EmailJS error:', err);
+        openMailtoFallback(emailTo, name, d.taxYear, r, reasonsText, docsText, cleanFormUrl);
+      });
+  } else {
+    // Fallback — פתח mailto אם EmailJS לא זמין
+    openMailtoFallback(emailTo, name, d.taxYear, r, reasonsText, docsText, cleanFormUrl);
+  }
 }
 
-function openMailtoFallback(emailTo, name, taxYear, r, reasonsText, docsText) {
+function openMailtoFallback(emailTo, name, taxYear, r, reasonsText, docsText, formUrl) {
   const d = window.lastFormData;
   const clientId = d ? `${d.phone ? d.phone.slice(-4) : ''}-${Date.now().toString().slice(-4)}` : Date.now().toString().slice(-4);
-  const subject = encodeURIComponent(`💰 תוצאות בדיקת הזכאות שלך + הטפסים המוכנים להגשה (תיק מס' ${clientId})`);
-  
-  const cleanFormUrl = `${window.location.origin}/All%20Attachments/tax-form-135-${taxYear}.pdf`;
+  const subject = encodeURIComponent(`💰 תוצאות בדיקת הזכאות שלך לשנת ${taxYear} — EZ Tax`);
+  const cleanFormUrl = formUrl || `https://ez-tax-one.vercel.app/All%20Attachments/tax-form-135-${taxYear}.pdf`;
 
   const bodyText = encodeURIComponent(
     `שלום ${name},\n\n` +
-    `אנו שמחים לעדכן כי בדיקת הזכאות שלך בפלטפורמת EZ-Tax הושלמה בהצלחה. על פי הנתונים שהזנת, סכום החזר המס המשוער שלך עבור שנת המס ${taxYear} עומד על כ-₪${r.refundMin.toLocaleString('he-IL')} – ₪${r.refundMax.toLocaleString('he-IL')}.\n\n` +
-    `בהתאם לסעיף 160 לפקודת מס הכנסה, כל אזרח זכאי לקבל החזר על מס ששולם ביתר בתוספת ריבית והפרשי הצמדה כחוק.\n\n` +
-    `📥 הורד טופס 135 הרשמי לשנת ${taxYear}:\n` +
-    `${cleanFormUrl}\n\n` +
-    `אנא מלא אותו, חתום עליו והחזר אותו אלינו (במייל חוזר או בוואטסאפ) לצורך הגשת הדו"ח.\n\n` +
-    `לאחר חתימתך והעלאת המסמכים המלווים הנדרשים, התיק ייבדק על ידי נציג שירות מקצועי וישודר ישירות לרשות המסים. כספי ההחזר יועברו ישירות לחשבון הבנק שלך בתוך 30 עד 90 ימים ממועד קליטת התיק במשרדי שומה.\n\n` +
-    `לנוחיותך, להלן רשימת המסמכים שיש לצרף לתיק לצורך הגשתו:\n` +
-    `${docsText}\n\n` +
-    `בברכה,\n` +
+    `בדיקת הזכאות שלך הושלמה. סכום החזר המס המשוער לשנת ${taxYear}: ₪${r.refundMin.toLocaleString('he-IL')} – ₪${r.refundMax.toLocaleString('he-IL')}.\n\n` +
+    `📥 טופס 135 לשנת ${taxYear} — להורדה ישירה:\n${cleanFormUrl}\n\n` +
+    `אנא מלא, חתום והחזר אלינו במייל חוזר או בוואטסאפ.\n\n` +
+    `מסמכים נוספים:\n${docsText}\n\n` +
     `צוות EZ Tax`
   );
-  window.location.href = `mailto:${emailTo}?subject=${subject}&body=${bodyText}`;
+  window.open(`mailto:${emailTo}?subject=${subject}&body=${bodyText}`, '_blank');
 }
 
 function showEmailSendingBadge() {

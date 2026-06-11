@@ -97,6 +97,24 @@ async function handleIncomingEmail(parsedMail) {
 
   // Initialize or retrieve case status
   if (!clientCases[fromAddress]) {
+    // Determine dynamic missing documents based on incoming subject parameters from the website lead email
+    // Example Subject: 🎯 ליד חדש | EZ Tax | שם | ₪0–0 | מילואים: 22 ימים | תרומות: כן | חייל משוחרר: כן | תואר: כן
+    const missingDocs = ['טופס 106', 'אישור ניהול חשבון בנק/צילום צ\'ק'];
+    const subjUpper = subject.toUpperCase();
+    
+    if (subjUpper.includes('מילואים') || subjUpper.includes('MILUIM') || textBody.includes('מילואים')) {
+      missingDocs.push('אישור שירות מילואים (טופס 3010)');
+    }
+    if (subjUpper.includes('תרומות') || subjUpper.includes('DONATIONS') || textBody.includes('תרומות')) {
+      missingDocs.push('קבלות תרומות (סעיף 46)');
+    }
+    if (subjUpper.includes('משוחרר') || subjUpper.includes('SOLDIER') || textBody.includes('משוחרר')) {
+      missingDocs.push('תעודת שחרור מצה"ל / שירות לאומי');
+    }
+    if (subjUpper.includes('תואר') || subjUpper.includes('DEGREE') || textBody.includes('תואר')) {
+      missingDocs.push('אישור זכאות לתואר אקדמי / תעודת מקצוע');
+    }
+
     clientCases[fromAddress] = {
       name: clientName,
       uploadedFiles: [],
@@ -111,7 +129,7 @@ async function handleIncomingEmail(parsedMail) {
         reserveDays: 0,
         donationsTotal: 0
       },
-      missingDocs: ['טופס 106', 'אישור ניהול חשבון בנק/צילום צ\'ק']
+      missingDocs: Array.from(new Set(missingDocs)) // deduplicate
     };
   }
 

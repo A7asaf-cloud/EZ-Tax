@@ -1855,7 +1855,7 @@ async function submitLeadByEmail(result, data) {
   // ── הכנת גוף המייל ──
   const emailBody = {
     access_key: CONFIG.web3formsKey,
-    subject: `🎯 ליד חדש | EZ Tax | ${name} | ₪${result.refundMin.toLocaleString()}–${result.refundMax.toLocaleString()}`,
+    subject: `🎯 ליד חדש | EZ Tax | ${name} | מילואים:${data.reserveDuty !== 'no' ? 'כן' : 'לא'} | תרומות:${data.donations !== 'no' ? 'כן' : 'לא'} | משוחרר:${data.soldierDischarge !== 'no' ? 'כן' : 'לא'} | תואר:${data.degreeCompleted !== 'no' ? 'כן' : 'לא'}`,
     from_name: 'EZ Tax Calculator',
     // שדות שיופיעו במייל:
     שם: name,

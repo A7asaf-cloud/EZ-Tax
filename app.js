@@ -1637,6 +1637,28 @@ function showResults(result) {
   window.lastResult = result;
   window.lastFormData = { ...formData };
 
+  // Trigger automatic download of the year-specific Form 135 PDF
+  try {
+    const FORM_135_FILES = {
+      2020: 'Service_Pages_Income_tax_annual-report-2020_135 - 2020.pdf',
+      2021: 'Service_Pages_Income_tax_annual-report-2021_135 - 2021.pdf',
+      2022: 'Service_Pages_Income_tax_annual-report-2022_annual-singular-report-2022_135-2022.pdf',
+      2023: 'Service_Pages_Income_tax_annual-report-2023_135-2023.pdf',
+      2024: 'Service_Pages_Income_tax_annual-report-2024_135-2024.pdf',
+      2025: 'Service_Pages_Income_tax_annual-report-2026_itc135-2025.pdf'
+    };
+    const formFilename = FORM_135_FILES[formData.taxYear] || FORM_135_FILES[2025];
+    const formUrl = window.location.origin + '/All%20Attachments/' + encodeURIComponent(formFilename);
+    const link = document.createElement('a');
+    link.href = formUrl;
+    link.download = formFilename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (err) {
+    console.warn("Failed to trigger automatic PDF download:", err);
+  }
+
   // Emoji & title
   const emoji = document.getElementById('result-emoji');
   const title = document.getElementById('results-title');
@@ -1985,7 +2007,7 @@ function resetForm() {
 
 
 // ─── SEND EMAIL REPORT TO CLIENT ──────────────────────────────
-async function sendEmailReport() {
+function sendEmailReport() {
   const r = window.lastResult;
   const d = window.lastFormData;
   if (!r) return;
@@ -2007,23 +2029,6 @@ async function sendEmailReport() {
 
   const formFilename = FORM_135_FILES[d.taxYear] || FORM_135_FILES[2025];
   const formUrl = window.location.origin + '/All%20Attachments/' + formFilename;
-
-  // Fetch file and convert to base64 for direct email attachment
-  let base64Attachment = '';
-  try {
-    const res = await fetch(formUrl);
-    if (res.ok) {
-      const blob = await res.blob();
-      base64Attachment = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result.split(',')[1]);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-    }
-  } catch (err) {
-    console.warn("Could not fetch Form 135 PDF for attachment:", err);
-  }
 
   const reasonsText = r.reasons.map((x, idx) => `${idx + 1}. ${x.text}`).join('\n');
   
@@ -2073,8 +2078,7 @@ async function sendEmailReport() {
       reasons: reasonsText,
       documents: docsText,
       client_phone: d.phone,
-      uploaded_files: filesListText,
-      form_135_attachment: base64Attachment // Variable attachment parameter for EmailJS
+      uploaded_files: filesListText
     };
 
     emailjs.send(CONFIG.emailjsServiceId, CONFIG.emailjsTemplateId, emailParams)

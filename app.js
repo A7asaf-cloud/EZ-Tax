@@ -305,6 +305,25 @@ function initNavbar() {
 }
 
 
+// ─── CONTACT DROPDOWN ────────────────────────────────────────
+function toggleContactMenu(e) {
+  e.stopPropagation();
+  const dd = document.getElementById('contact-dropdown');
+  dd.classList.toggle('open');
+}
+
+// Close dropdown when clicking anywhere else
+document.addEventListener('click', (e) => {
+  const wrap = document.getElementById('nav-contact-wrap');
+  if (wrap && !wrap.contains(e.target)) {
+    const dd = document.getElementById('contact-dropdown');
+    if (dd) dd.classList.remove('open');
+  }
+});
+
+
+
+
 // ─── HERO CARD ANIMATION ─────────────────────────────────────
 function animateHeroCard() {
   const targetScore = 84;

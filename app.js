@@ -1,7 +1,7 @@
 /* =============================================
    TaxOS — Tax Calculation Engine + UI Logic
    ============================================= */
-console.log("🚀 EZ Tax — Code Version 3.0 Loaded — Diagnostics Active");
+console.log("🚀 EZ Tax — Code Version 3.1 Loaded — Diagnostics Active");
 
 // ─── הגדרות אישיות — שנה כאן בלבד! ─────────────────────────────
 const CONFIG = {
@@ -1485,7 +1485,6 @@ function runCalculation(data) {
     text: `טופס 135 הרשמי לשנת ${year} (להורדה ישירה: ${cleanFormUrl})`, 
     priority: 'critical' 
   });
-  docs.push({ text: 'טופס 106 מקורי ומלא מכל המעסיקים עבור אותן שנים', priority: 'critical' });
   docs.push({ text: 'תעודת זהות (ספח)', priority: 'critical' });
   docs.push({ text: 'אישור ניהול חשבון בנק', priority: 'critical' });
 
@@ -2038,7 +2037,19 @@ async function sendEmailReport() {
     return `${idx + 1}. ${cleanText} (${doc.priority === 'critical' ? 'חובה' : doc.priority === 'important' ? 'חשוב' : 'אופציונלי'})`;
   });
   const docsText = docsTextList.join('\n');
-  const docsHtml = docsTextList.join('<br>');
+
+  // Build HTML docs checklist converting URLs to clean anchor links
+  const docsHtmlList = r.docs.map((doc, idx) => {
+    let cleanText = doc.text.replace(/<[^>]*>/g, '');
+    const urlRegex = /(https?:\/\/[^\s\)]+)/g;
+    if (urlRegex.test(cleanText)) {
+      cleanText = cleanText.replace(urlRegex, (url) => {
+        return `<a href="${url}" target="_blank">לחץ כאן להורדה</a>`;
+      });
+    }
+    return `${idx + 1}. ${cleanText} (${doc.priority === 'critical' ? 'חובה' : doc.priority === 'important' ? 'חשוב' : 'אופציונלי'})`;
+  });
+  const docsHtml = docsHtmlList.join('<br>');
 
   // 2. שלח ללקוח דרך EmailJS (אוטומטי, ללא חלוניות)
   if (CONFIG.emailjsServiceId && CONFIG.emailjsTemplateId && CONFIG.emailjsPublicKey && typeof emailjs !== 'undefined') {

@@ -494,7 +494,7 @@ window.openMailApp = function(e) {
       window.removeEventListener('pagehide', handleVisibilityChange);
       window.removeEventListener('blur', handleVisibilityChange);
       if (!redirected) {
-        window.open(webGmailUrl, '_blank');
+        window.location.href = webGmailUrl;
       }
     }, 1200);
   } else {
@@ -540,7 +540,7 @@ window.openMailAppDirect = function(e) {
       window.removeEventListener('pagehide', handleVisibilityChange);
       window.removeEventListener('blur', handleVisibilityChange);
       if (!redirected) {
-        window.open(webGmailUrl, '_blank');
+        window.location.href = webGmailUrl;
       }
     }, 1200);
   } else {

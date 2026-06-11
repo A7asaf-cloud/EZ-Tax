@@ -230,7 +230,7 @@ for (const year of [2020, 2021, 2022, 2023, 2024, 2025]) {
 // ─── STATE ───────────────────────────────────────────────────
 let currentStep = 1;
 let leadSubmitted = false;
-const TOTAL_STEPS = 6;
+const TOTAL_STEPS = 5;
 const formData = {
   firstName: '',
   taxYear: 2025,
@@ -919,8 +919,6 @@ function handleNext() {
     formData.email = emailVal;
     formData.firstName = document.getElementById('firstName').value.trim();
 
-    goToStep(6);
-  } else if (currentStep === 6) {
     runAnalysis();
   }
 }

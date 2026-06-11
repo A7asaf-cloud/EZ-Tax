@@ -237,11 +237,11 @@
     <!-- PROGRESS BAR -->
     <div class="progress-wrap" id="progress-wrap">
       <div class="progress-info">
-        <span id="step-label">שלב 1 מתוך 6</span>
-        <span id="step-pct">17%</span>
+        <span id="step-label">שלב 1 מתוך 5</span>
+        <span id="step-pct">20%</span>
       </div>
       <div class="progress-bar-outer">
-        <div class="progress-bar-inner" id="progress-bar" style="width:17%"></div>
+        <div class="progress-bar-inner" id="progress-bar" style="width:20%"></div>
       </div>
       <div class="progress-dots">
         <div class="pdot active" data-step="1">
@@ -263,10 +263,6 @@
         <div class="pdot" data-step="5">
           <span class="pdot-icon">🏦</span>
           <span class="pdot-label">פיננסי</span>
-        </div>
-        <div class="pdot" data-step="6">
-          <span class="pdot-icon">📁</span>
-          <span class="pdot-label">מסמכים</span>
         </div>
       </div>
 
@@ -537,50 +533,7 @@
         </div>
       </div>
 
-      <!-- STEP 6: Document Upload -->
-      <div class="form-step" id="step-6">
-        <div class="step-intro">
-          <h3 class="step-title">📁 העלה מסמכים (אופציונלי)</h3>
-          <p class="step-desc">העלאה עכשיו <strong>מאיצה את הטיפול</strong> בתיק שלך. ניתן גם לשלוח לאחר מכן ב-WhatsApp.</p>
-        </div>
 
-        <div class="docs-checklist" id="docs-checklist">
-          <!-- filled by JS -->
-        </div>
-
-        <div class="upload-zone" id="upload-zone">
-          <input type="file" id="file-upload" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="display:none" />
-          <div class="upload-content" id="upload-content">
-            <div class="upload-icon">📂</div>
-            <p class="upload-title">גרור קבצים לכאן</p>
-            <p class="upload-sub">PDF, JPG, PNG — עד 10MB לקובץ</p>
-            <button class="upload-btn" type="button" onclick="document.getElementById('file-upload').click()">בחר קבצים</button>
-          </div>
-        </div>
-
-        <div class="uploaded-files-list" id="uploaded-files-list"></div>
-
-        <div class="upload-alternatives">
-          <div class="alt-option">
-            <span class="alt-icon">💬</span>
-            <div>
-              <div class="alt-title">שלח מסמכים ב-WhatsApp</div>
-              <div class="alt-sub">אנחנו נשלח לך קישור לאחר הגשה</div>
-            </div>
-          </div>
-          <div class="alt-option">
-            <span class="alt-icon">📧</span>
-            <div>
-              <div class="alt-title">שלח מסמכים במייל</div>
-              <div class="alt-sub"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="20434f4e544143540e455a0e534543555249545960474d41494c0e434f4d">[email&#160;protected]</a></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="skip-upload-wrap">
-          <button class="skip-btn" type="button" id="btn-skip-upload">אין לי מסמכים עכשיו — המשך בלי העלאה</button>
-        </div>
-      </div>
 
       <!-- NAV BUTTONS -->
       <div class="form-nav" id="form-nav">

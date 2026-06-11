@@ -1996,11 +1996,23 @@ function sendEmailReport() {
   // 1. שלח ליועץ ברקע (Web3Forms)
   submitLeadByEmail(r, d);
 
+  const FORM_135_FILES = {
+    2020: 'Service_Pages_Income_tax_annual-report-2020_135%20-%202020.pdf',
+    2021: 'Service_Pages_Income_tax_annual-report-2021_135%20-%202021.pdf',
+    2022: 'Service_Pages_Income_tax_annual-report-2022_annual-singular-report-2022_135-2022.pdf',
+    2023: 'Service_Pages_Income_tax_annual-report-2023_135-2023.pdf',
+    2024: 'Service_Pages_Income_tax_annual-report-2024_135-2024.pdf',
+    2025: 'Service_Pages_Income_tax_annual-report-2026_itc135-2025.pdf'
+  };
+
+  const formFilename = FORM_135_FILES[d.taxYear] || FORM_135_FILES[2025];
+  const formUrl = window.location.origin + '/All%20Attachments/' + formFilename;
+
   const reasonsText = r.reasons.map((x, idx) => `${idx + 1}. ${x.text}`).join('\n');
   
   // Dynamically build legally compliant official document checklist based on client profile flags
   const checklistItems = [
-    "טופס 135 מלא ומקודד (דין וחשבון שנתי מקוצר לשכירים) עבור שנות המס הרלוונטיות.",
+    `טופס 135 רשמי לשנת ${d.taxYear} (להורדה ומילוי: ${formUrl} ) - חובה למלא, לחתום ולהחזיר אלינו.`,
     "טופס 106 מקורי ומלא מכל המעסיקים עבור אותן שנים.",
     "אישור ניהול חשבון בנק או צילום צ'ק (חובה על פי חוק לצורך העברת הזיכוי ישירות לחשבון)."
   ];
@@ -2055,31 +2067,31 @@ function sendEmailReport() {
     .catch((err) => {
       console.error('❌ EmailJS error:', err);
       alert(`שגיאה משירות המייל (EmailJS): ${err.text || err.message || JSON.stringify(err)}\n\nפרטי השליחה:\n- אימייל לקוח: "${emailTo}"\n- שם לקוח: "${name}"\n\n(אם המייל נכון, הבעיה היא שהגדרת "To Email" בתבנית ב-EmailJS ריקה או שגויה)`);
-      openMailtoFallback(emailTo, name, d.taxYear, r, reasonsText, docsText);
+      openMailtoFallback(emailTo, name, d.taxYear, r, reasonsText, docsText, formUrl);
     });
   } else {
     let reason = "";
     if (!CONFIG.emailjsServiceId) reason += "חסר Service ID. ";
     if (!CONFIG.emailjsTemplateId) reason += "חסר Template ID. ";
     if (!CONFIG.emailjsPublicKey) reason += "חסר Public Key. ";
-    if (typeof emailjs === 'undefined') reason += "הסקריפט של EmailJS לא נטען בדפדפן (ייתכן שנחסם ע\"י חוסם פרסומות/AdBlocker או בעיית אינטרנט). ";
+    if (typeof emailjs === 'undefined') reason += "הסקריפט של EmailJS לא נטען בדפנפן (ייתכן שנחסם ע\"י חוסם פרסומות/AdBlocker או בעיית אינטרנט). ";
     
     console.warn('EmailJS fallback active. Reason:', reason);
     alert(`שליחה אוטומטית נכשלה ועוברת לגיבוי ידני.\nסיבה: ${reason}\n\nפרטי השליחה:\n- אימייל לקוח: "${emailTo}"\n\n(נלחץ על אישור כדי לפתוח את תוכנת המייל הידנית)`);
-    openMailtoFallback(emailTo, name, d.taxYear, r, reasonsText, docsText);
+    openMailtoFallback(emailTo, name, d.taxYear, r, reasonsText, docsText, formUrl);
   }
 }
 
-function openMailtoFallback(emailTo, name, taxYear, r, reasonsText, docsText) {
+function openMailtoFallback(emailTo, name, taxYear, r, reasonsText, docsText, formUrl) {
   const d = window.lastFormData;
   const clientId = d ? `${d.phone ? d.phone.slice(-4) : ''}-${Date.now().toString().slice(-4)}` : Date.now().toString().slice(-6);
   const subject = encodeURIComponent(`💰 תוצאות בדיקת הזכאות שלך + הטפסים המוכנים להגשה (תיק מס' ${clientId})`);
   
   const bodyText = encodeURIComponent(
     `שלום ${name},\n\n` +
-    `אנו שמחים לעדכן כי בדיקת הזכאות שלך בפלטפורמת EZ-Tax הושלמה בהצלחה. על פי הנתונים שהזנת, סכום החזר המס המשוער שלך עבור שנות המס ${taxYear} עומד על כ-₪${r.refundMin.toLocaleString('he-IL')} – ₪${r.refundMax.toLocaleString('he-IL')}.\n\n` +
-    `בהתאם לסעיף 160 לפקודת מס הכנסה, כל אזרח זכאי לקבל החזר על מס ששולם ביתר בתוספת ריבית והפרשי הצמדה כחוק. כדי לפשט עבורך את התהליך, המערכת שלנו כבר הפיקה באופן אוטומטי את טופס 135 (הדו\"ח השנתי המקוצר לשכירים) עבור השנים הרלוונטיות, והוא מוכן לחתימתך.\n\n` +
-    `אנא היכנס לקישור המצורף על מנת לחתום דיגיטלית באופן מאובטח על הטפסים ולהשלים את ההגשה: https://ez-tax.co.il/signature?client_id=${clientId}\n\n` +
+    `אנו שמחים לעדכן כי בדיקת הזכאות שלך בפלטפורמת EZ-Tax הושלמה בהצלחה. על פי הנתונים שהזנת, סכום החזר המס המשוער שלך עבור שנת המס ${taxYear} עומד על כ-₪${r.refundMin.toLocaleString('he-IL')} – ₪${r.refundMax.toLocaleString('he-IL')}.\n\n` +
+    `בהתאם לסעיף 160 לפקודת מס הכנסה, כל אזרח זכאי לקבל החזר על מס ששולם ביתר בתוספת ריבית והפרשי הצמדה כחוק.\n\n` +
+    `אנא הורד את טופס 135 הרשמי לשנת ${taxYear} שהכנו עבורך בקישור הבא, מלא אותו, חתום עליו והחזר אותו אלינו (במייל חוזר או בוואטסאפ) לצורך הגשת הדו"ח:\n${formUrl}\n\n` +
     `לאחר חתימתך והעלאת המסמכים המלווים הנדרשים, התיק ייבדק על ידי נציג שירות מקצועי וישודר ישירות לרשות המסים. כספי ההחזר יועברו ישירות לחשבון הבנק שלך בתוך 30 עד 90 ימים ממועד קליטת התיק במשרדי שומה.\n\n` +
     `לנוחיותך, להלן רשימת המסמכים שיש לצרף לתיק לצורך הגשתו:\n` +
     `${docsText}\n\n` +

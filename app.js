@@ -327,7 +327,7 @@ window.closeContactModal = function(e) {
 window.openWhatsApp = function(e) {
   if (e) e.preventDefault();
   const phone = CONFIG.whatsappNumber || '972502196259';
-  const text = encodeURIComponent('שלום, ברצוני לפנות לשירות הלקוחות של EZ Tax.');
+  const text = encodeURIComponent('שלום רב, ברצוני לפנות לשירות הלקוחות של EZ Tax בנוגע לבדיקת זכאות להחזר מס. אשמח לקבל מענה מנציג. תודה.');
   
   // Use a universal link that is 100% reliable on all platforms (mobile app and desktop web)
   const url = `https://wa.me/${phone}?text=${text}`;
@@ -338,23 +338,42 @@ window.openMailApp = function(e) {
   if (e) e.preventDefault();
   const email = 'contact.ez.security@gmail.com';
   const subject = encodeURIComponent('פנייה לשירות הלקוחות - EZ Tax');
-  const body = encodeURIComponent('שלום צוות EZ Tax,\n\nברצוני לפנות לשירות הלקוחות בנושא:\n');
+  const body = encodeURIComponent(
+    'שלום רב,\n\n' +
+    'אני פונה אליכם בעקבות הבדיקה שביצעתי באתר EZ Tax.\n' +
+    'ברצוני לקבל מידע נוסף ולשוחח עם נציג/יועץ מס בנושא:\n\n' +
+    'בברכה,\n'
+  );
   
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   const isAndroid = /Android/i.test(navigator.userAgent);
   
+  const webGmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${subject}&body=${body}`;
+  
   if (isIOS || isAndroid) {
-    // Try to open Gmail app directly
+    // Try to open native Gmail app directly
     const gmailUrl = `googlegmail:///co?to=${email}&subject=${subject}&body=${body}`;
+    
+    let redirected = false;
+    const handleVisibilityChange = () => {
+      redirected = true;
+    };
+    window.addEventListener('pagehide', handleVisibilityChange, { once: true });
+    window.addEventListener('blur', handleVisibilityChange, { once: true });
+    
     window.location.href = gmailUrl;
     
-    // Fallback to standard mailto after 800ms if Gmail app is not installed/opened
+    // Fallback ONLY to Gmail Web Compose, so we never open the native Apple Mail / default Mail app
     setTimeout(() => {
-      window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
-    }, 800);
+      window.removeEventListener('pagehide', handleVisibilityChange);
+      window.removeEventListener('blur', handleVisibilityChange);
+      if (!redirected) {
+        window.open(webGmailUrl, '_blank');
+      }
+    }, 1200);
   } else {
-    // Desktop / Default
-    window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+    // Desktop: Open Gmail Web Compose directly
+    window.open(webGmailUrl, '_blank');
   }
 };
 

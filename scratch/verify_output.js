@@ -7,7 +7,7 @@ const docs = [
   { text: "אישור ניהול חשבון בנק או צילום צ'ק (חובה על פי חוק לצורך העברת הזיכוי ישירות לחשבון)", priority: 'critical' }
 ];
 
-const docsHtmlList = docs.map((doc, idx) => {
+const docsHtmlList = docs.map((doc) => {
   let cleanText = doc.text.replace(/<[^>]*>/g, '');
   if (cleanText.includes('טופס 135 רשמי לשנת')) {
     const match = cleanText.match(/(https?:\/\/[^\s\)]+)/);
@@ -25,9 +25,9 @@ const docsHtmlList = docs.map((doc, idx) => {
       });
     }
   }
-  return `${idx + 1}. ${cleanText}`;
+  return `<li>${cleanText}</li>`;
 });
 
-const docsHtml = docsHtmlList.join('<br>');
+const docsHtml = '<ol dir="rtl">' + docsHtmlList.join('') + '</ol>';
 console.log("=== VERIFYING DOCS HTML OUTPUT ===");
 console.log(docsHtml);

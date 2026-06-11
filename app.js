@@ -1,7 +1,7 @@
 /* =============================================
    TaxOS — Tax Calculation Engine + UI Logic
    ============================================= */
-console.log("🚀 EZ Tax — Code Version 3.3 Loaded — Diagnostics Active");
+console.log("🚀 EZ Tax — Code Version 3.4 Loaded — Diagnostics Active");
 
 // ─── הגדרות אישיות — שנה כאן בלבד! ─────────────────────────────
 const CONFIG = {
@@ -2073,12 +2073,12 @@ async function sendEmailReport() {
   const docsTextList = r.docs.map((doc, idx) => {
     // Strip HTML tags from doc.text if they exist (for clean email display)
     const cleanText = doc.text.replace(/<[^>]*>/g, '');
-    return `${idx + 1}. ${cleanText}`;
+    return `\u200F${idx + 1}. \u200F${cleanText}`;
   });
   const docsText = docsTextList.join('\n');
 
   // Build HTML docs checklist converting URLs to clean anchor links
-  const docsHtmlList = r.docs.map((doc, idx) => {
+  const docsHtmlList = r.docs.map((doc) => {
     let cleanText = doc.text.replace(/<[^>]*>/g, '');
     if (cleanText.includes('טופס 135 רשמי לשנת')) {
       const match = cleanText.match(/(https?:\/\/[^\s\)]+)/);
@@ -2096,9 +2096,9 @@ async function sendEmailReport() {
         });
       }
     }
-    return `${idx + 1}. ${cleanText}`;
+    return `<li>${cleanText}</li>`;
   });
-  const docsHtml = docsHtmlList.join('<br>');
+  const docsHtml = '<ol dir="rtl">' + docsHtmlList.join('') + '</ol>';
 
   // 2. שלח ללקוח דרך EmailJS (אוטומטי, ללא חלוניות)
   if (CONFIG.emailjsServiceId && CONFIG.emailjsTemplateId && CONFIG.emailjsPublicKey && typeof emailjs !== 'undefined') {

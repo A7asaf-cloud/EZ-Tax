@@ -1985,7 +1985,7 @@ function resetForm() {
 
 
 // ─── SEND EMAIL REPORT TO CLIENT ──────────────────────────────
-function sendEmailReport() {
+async function sendEmailReport() {
   const r = window.lastResult;
   const d = window.lastFormData;
   if (!r) return;
@@ -2007,6 +2007,23 @@ function sendEmailReport() {
 
   const formFilename = FORM_135_FILES[d.taxYear] || FORM_135_FILES[2025];
   const formUrl = window.location.origin + '/All%20Attachments/' + formFilename;
+
+  // Fetch file and convert to base64 for direct email attachment
+  let base64Attachment = '';
+  try {
+    const res = await fetch(formUrl);
+    if (res.ok) {
+      const blob = await res.blob();
+      base64Attachment = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    }
+  } catch (err) {
+    console.warn("Could not fetch Form 135 PDF for attachment:", err);
+  }
 
   const reasonsText = r.reasons.map((x, idx) => `${idx + 1}. ${x.text}`).join('\n');
   
@@ -2056,7 +2073,8 @@ function sendEmailReport() {
       reasons: reasonsText,
       documents: docsText,
       client_phone: d.phone,
-      uploaded_files: filesListText
+      uploaded_files: filesListText,
+      form_135_attachment: base64Attachment // Variable attachment parameter for EmailJS
     };
 
     emailjs.send(CONFIG.emailjsServiceId, CONFIG.emailjsTemplateId, emailParams)

@@ -1,7 +1,7 @@
 /* =============================================
    TaxOS — Tax Calculation Engine + UI Logic
    ============================================= */
-console.log("🚀 EZ Tax — Code Version 3.2 Loaded — Diagnostics Active");
+console.log("🚀 EZ Tax — Code Version 3.3 Loaded — Diagnostics Active");
 
 // ─── הגדרות אישיות — שנה כאן בלבד! ─────────────────────────────
 const CONFIG = {
@@ -2073,7 +2073,7 @@ async function sendEmailReport() {
   const docsTextList = r.docs.map((doc, idx) => {
     // Strip HTML tags from doc.text if they exist (for clean email display)
     const cleanText = doc.text.replace(/<[^>]*>/g, '');
-    return `${idx + 1}. ${cleanText} (${doc.priority === 'critical' ? 'חובה' : doc.priority === 'important' ? 'חשוב' : 'אופציונלי'})`;
+    return `${idx + 1}. ${cleanText}`;
   });
   const docsText = docsTextList.join('\n');
 
@@ -2096,7 +2096,7 @@ async function sendEmailReport() {
         });
       }
     }
-    return `${idx + 1}. ${cleanText} (${doc.priority === 'critical' ? 'חובה' : doc.priority === 'important' ? 'חשוב' : 'אופציונלי'})`;
+    return `${idx + 1}. ${cleanText}`;
   });
   const docsHtml = docsHtmlList.join('<br>');
 

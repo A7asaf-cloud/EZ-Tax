@@ -235,20 +235,61 @@ async function analyzeDocumentWithAI(file, clientCase) {
 }
 
 /**
- * Send smart reply to client
+ * Send smart reply to client using Gemini to generate a highly personalized, professional message
  */
 async function generateAndSendReply(emailAddress, clientCase) {
   let emailText = '';
   let subject = `עדכון לגבי בקשת החזר המס שלך - EZ Tax`;
+  const isFinished = clientCase.missingDocs.length === 0;
 
-  if (clientCase.missingDocs.length > 0) {
-    emailText = `שלום ${clientCase.extractedData.firstName},\n\n` +
-      `תודה על המסמכים ששלחת לנו. קלטנו אותם בהצלחה.\n` +
-      `על מנת להשלים את הגשת הדו"ח השנתי לרשות המסים, נשמח אם תשלח לנו את המסמכים החסרים הבאים:\n` +
-      clientCase.missingDocs.map(doc => `• ${doc}`).join('\n') + `\n\n` +
-      `פשוט השב למייל זה וצרף את המסמכים החסרים.\n\n` +
-      `בברכה,\nצוות EZ Tax 🤖`;
-  } else {
+  if (genAI) {
+    try {
+      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      
+      const prompt = `
+        You are "EZ Tax AI Advisor", an expert tax service chatbot.
+        Draft a polite, professional email in Hebrew to the client named "${clientCase.extractedData.firstName}".
+        
+        Case Details:
+        - Tax Year: ${clientCase.extractedData.taxYear}
+        - Uploaded files so far: ${clientCase.uploadedFiles.join(', ') || 'None'}
+        - Missing documents required: ${clientCase.missingDocs.join(', ')}
+        - Is case complete: ${isFinished ? 'Yes' : 'No'}
+        
+        Guidelines:
+        1. Write in clear, warm, and professional business Hebrew.
+        2. If NOT complete (missing docs > 0): Explain exactly what documents we received, list the specific missing documents nicely, and ask them to reply directly to this email to upload them.
+        3. If complete (missing docs == 0): Congratulate them, explain that their official Form 135 PDF for year ${clientCase.extractedData.taxYear} has been generated and is attached to this email. Explain that they can now log into the Israel Tax Authority portal and upload this PDF to get their refund.
+        4. Sign the email as "צוות EZ Tax 🤖".
+        5. Return only the email body text. Do not include placeholders like "[שם]". Use their name: "${clientCase.extractedData.firstName}".
+      `;
+
+      const result = await model.generateContent(prompt);
+      emailText = result.response.text().trim();
+    } catch (e) {
+      console.error('❌ Failed to generate AI reply email text, falling back to template:', e.message);
+    }
+  }
+
+  // Fallback to static templates if AI generation failed
+  if (!emailText) {
+    if (!isFinished) {
+      emailText = `שלום ${clientCase.extractedData.firstName},\n\n` +
+        `תודה על המסמכים ששלחת לנו. קלטנו אותם בהצלחה.\n` +
+        `על מנת להשלים את הגשת הדו"ח השנתי לרשות המסים, נשמח אם תשלח לנו את המסמכים החסרים הבאים:\n` +
+        clientCase.missingDocs.map(doc => `• ${doc}`).join('\n') + `\n\n` +
+        `פשוט השב למייל זה וצרף את המסמכים החסרים.\n\n` +
+        `בברכה,\nצוות EZ Tax 🤖`;
+    } else {
+      emailText = `שלום ${clientCase.extractedData.firstName},\n\n` +
+        `חדשות מעולות! כל המסמכים שלך התקבלו ועובדו בהצלחה על ידי הבינה המלאכותית שלנו.\n` +
+        `הכנו עבורך את טופס 135 הרשמי לשנת ${clientCase.extractedData.taxYear} כשהוא כבר ממולא במלואו.\n\n` +
+        `מצורף למייל זה קובץ ה-PDF המלא. כל שעליך לעשות הוא להיכנס לאזור האישי באתר רשות המסים, ולהעלות אותו יחד עם שאר המסמכים ששלחת לנו.\n\n` +
+        `שמחנו לעזור!\nצוות EZ Tax 🤖`;
+    }
+  }
+
+  if (isFinished) {
     // Generate filled Form 135 PDF
     const templatePath = path.join(__dirname, 'blank_135.pdf');
     const outPdfName = `Form_135_Filled_${clientCase.extractedData.firstName}_${clientCase.extractedData.taxYear}.pdf`;
@@ -263,11 +304,6 @@ async function generateAndSendReply(emailAddress, clientCase) {
     }
 
     subject = `🎯 התיק שלך מוכן להגשה! - EZ Tax`;
-    emailText = `שלום ${clientCase.extractedData.firstName},\n\n` +
-      `חדשות מעולות! כל המסמכים שלך התקבלו ועובדו בהצלחה על ידי הבינה המלאכותית שלנו.\n` +
-      `הכנו עבורך את טופס 135 הרשמי לשנת ${clientCase.extractedData.taxYear} כשהוא כבר ממולא במלואו.\n\n` +
-      `מצורף למייל זה קובץ ה-PDF המלא. כל שעליך לעשות הוא להיכנס לאזור האישי באתר רשות המסים, ולהעלות אותו יחד עם שאר המסמכים ששלחת לנו.\n\n` +
-      `שמחנו לעזור!\nצוות EZ Tax 🤖`;
 
     // Send email with attachment if PDF was generated
     const mailOptions = {

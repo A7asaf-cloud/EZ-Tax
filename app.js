@@ -305,42 +305,58 @@ function initNavbar() {
 }
 
 
-// ─── CONTACT DROPDOWN ────────────────────────────────────────
-function toggleContactMenu(e) {
-  e.stopPropagation();
-  const dd = document.getElementById('contact-dropdown');
-  dd.classList.toggle('open');
-}
+// ─── CONTACT MODAL CONTROLS ──────────────────────────────────
+window.openContactModal = function(e) {
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  const modal = document.getElementById('contact-modal');
+  if (modal) modal.classList.add('open');
+};
+
+window.closeContactModal = function(e) {
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  const modal = document.getElementById('contact-modal');
+  if (modal) modal.classList.remove('open');
+};
 
 window.openWhatsApp = function(e) {
   if (e) e.preventDefault();
-  const phone = '972502196259';
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  if (isMobile) {
-    window.location.href = `whatsapp://send?phone=${phone}`;
-    setTimeout(() => {
-      window.location.href = `https://wa.me/${phone}`;
-    }, 500);
-  } else {
-    window.open(`https://web.whatsapp.com/send?phone=${phone}`, '_blank');
-  }
+  const phone = CONFIG.whatsappNumber || '972502196259';
+  const text = encodeURIComponent('שלום, ברצוני לפנות לשירות הלקוחות של EZ Tax.');
+  
+  // Use a universal link that is 100% reliable on all platforms (mobile app and desktop web)
+  const url = `https://wa.me/${phone}?text=${text}`;
+  window.open(url, '_blank');
 };
 
 window.openMailApp = function(e) {
   if (e) e.preventDefault();
   const email = 'contact.ez.security@gmail.com';
-  const subject = encodeURIComponent('פנייה מ-EZ Tax');
-  window.location.href = `mailto:${email}?subject=${subject}`;
-};
-
-// Close dropdown when clicking anywhere else
-document.addEventListener('click', (e) => {
-  const wrap = document.getElementById('nav-contact-wrap');
-  if (wrap && !wrap.contains(e.target)) {
-    const dd = document.getElementById('contact-dropdown');
-    if (dd) dd.classList.remove('open');
+  const subject = encodeURIComponent('פנייה לשירות הלקוחות - EZ Tax');
+  const body = encodeURIComponent('שלום צוות EZ Tax,\n\nברצוני לפנות לשירות הלקוחות בנושא:\n');
+  
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const isAndroid = /Android/i.test(navigator.userAgent);
+  
+  if (isIOS || isAndroid) {
+    // Try to open Gmail app directly
+    const gmailUrl = `googlegmail:///co?to=${email}&subject=${subject}&body=${body}`;
+    window.location.href = gmailUrl;
+    
+    // Fallback to standard mailto after 800ms if Gmail app is not installed/opened
+    setTimeout(() => {
+      window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+    }, 800);
+  } else {
+    // Desktop / Default
+    window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
   }
-});
+};
 
 
 

@@ -2020,9 +2020,8 @@ async function sendEmailReport() {
 
   const reasonsText = r.reasons.map((x, idx) => `${idx + 1}. ${x.text}`).join('\n');
   
-  // Dynamically build legally compliant official document checklist based on client profile flags (without crappy download link)
   const checklistItems = [
-    `טופס 135 רשמי ומלא לשנת ${d.taxYear} (מצורף למייל זה - נא למלא ולחתום).`,
+    `טופס 135 רשמי ומלא לשנת ${d.taxYear} (קישור להורדה מצורף בגוף המייל - נא למלא ולחתום).`,
     "טופס 106 מקורי ומלא מכל המעסיקים עבור אותן שנים.",
     "אישור ניהול חשבון בנק או צילום צ'ק (חובה על פי חוק לצורך העברת הזיכוי ישירות לחשבון)."
   ];
@@ -2045,54 +2044,24 @@ async function sendEmailReport() {
   
   const docsText = checklistItems.map((item, idx) => `${idx + 1}. ${item}`).join('\n');
 
-  console.log('✉️ Attempting automatic send via Vercel Serverless Function to:', emailTo, { name, taxYear: d.taxYear });
-  showEmailSendingBadge();
-
-  try {
-    const response = await fetch('/api/send-email', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        emailTo: emailTo,
-        name: name,
-        taxYear: d.taxYear,
-        score: r.eligibilityScore,
-        refundMin: r.refundMin.toLocaleString('he-IL'),
-        refundMax: r.refundMax.toLocaleString('he-IL'),
-        probability: r.probability,
-        reasons: reasonsText,
-        documents: docsText
-      })
-    });
-
-    const result = await response.json();
-    if (response.ok && result.success) {
-      console.log('✅ Email sent successfully via Vercel Backend');
-      showEmailSentToClientBadge();
-    } else {
-      console.error('❌ Backend Email send error:', result.error);
-      alert(`שגיאה בשליחת המייל: ${result.error || 'שגיאה לא ידועה'}\nעובר לשליחה ידנית.`);
-      openMailtoFallback(emailTo, name, d.taxYear, r, reasonsText, docsText);
-    }
-  } catch (err) {
-    console.error('❌ Network error sending email:', err);
-    alert(`שגיאת תקשורת בשליחת המייל: ${err.message || err}\nעובר לשליחה ידנית.`);
-    openMailtoFallback(emailTo, name, d.taxYear, r, reasonsText, docsText);
-  }
+  showEmailSentToClientBadge();
+  openMailtoFallback(emailTo, name, d.taxYear, r, reasonsText, docsText);
 }
 
 function openMailtoFallback(emailTo, name, taxYear, r, reasonsText, docsText) {
   const d = window.lastFormData;
-  const clientId = d ? `${d.phone ? d.phone.slice(-4) : ''}-${Date.now().toString().slice(-4)}` : Date.now().toString().slice(-6);
+  const clientId = d ? `${d.phone ? d.phone.slice(-4) : ''}-${Date.now().toString().slice(-4)}` : Date.now().toString().slice(-4);
   const subject = encodeURIComponent(`💰 תוצאות בדיקת הזכאות שלך + הטפסים המוכנים להגשה (תיק מס' ${clientId})`);
   
+  const cleanFormUrl = `${window.location.origin}/All%20Attachments/tax-form-135-${taxYear}.pdf`;
+
   const bodyText = encodeURIComponent(
     `שלום ${name},\n\n` +
     `אנו שמחים לעדכן כי בדיקת הזכאות שלך בפלטפורמת EZ-Tax הושלמה בהצלחה. על פי הנתונים שהזנת, סכום החזר המס המשוער שלך עבור שנת המס ${taxYear} עומד על כ-₪${r.refundMin.toLocaleString('he-IL')} – ₪${r.refundMax.toLocaleString('he-IL')}.\n\n` +
     `בהתאם לסעיף 160 לפקודת מס הכנסה, כל אזרח זכאי לקבל החזר על מס ששולם ביתר בתוספת ריבית והפרשי הצמדה כחוק.\n\n` +
-    `טופס 135 הרשמי לשנת ${taxYear} מצורף למייל זה שנשלח אליך. אנא מלא אותו, חתום עליו והחזר אותו אלינו (במייל חוזר או בוואטסאפ) לצורך הגשת הדו"ח.\n\n` +
+    `📥 הורד טופס 135 הרשמי לשנת ${taxYear}:\n` +
+    `${cleanFormUrl}\n\n` +
+    `אנא מלא אותו, חתום עליו והחזר אותו אלינו (במייל חוזר או בוואטסאפ) לצורך הגשת הדו"ח.\n\n` +
     `לאחר חתימתך והעלאת המסמכים המלווים הנדרשים, התיק ייבדק על ידי נציג שירות מקצועי וישודר ישירות לרשות המסים. כספי ההחזר יועברו ישירות לחשבון הבנק שלך בתוך 30 עד 90 ימים ממועד קליטת התיק במשרדי שומה.\n\n` +
     `לנוחיותך, להלן רשימת המסמכים שיש לצרף לתיק לצורך הגשתו:\n` +
     `${docsText}\n\n` +

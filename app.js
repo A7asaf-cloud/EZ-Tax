@@ -371,8 +371,14 @@ function getContactInfo() {
   const email = emailEl ? emailEl.value.trim() : '';
   const message = messageEl ? messageEl.value.trim() : '';
   
-  // Validation: name at least 2 chars, phone at least 9 chars, email contains @
-  if (name.length < 2 || phone.length < 9 || !email.includes('@')) {
+  // Validation: name at least 2 chars, phone at least 9 chars
+  if (name.length < 2 || phone.length < 9) {
+    if (errorEl) errorEl.style.display = 'block';
+    return null;
+  }
+  
+  // Optional email check: if provided, must contain @
+  if (email.length > 0 && !email.includes('@')) {
     if (errorEl) errorEl.style.display = 'block';
     return null;
   }

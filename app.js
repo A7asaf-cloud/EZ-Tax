@@ -1891,7 +1891,31 @@ function sendEmailReport() {
   submitLeadByEmail(r, d);
 
   const reasonsText = r.reasons.map((x, idx) => `${idx + 1}. ${x.text}`).join('\n');
-  const docsText = [...new Set(r.docs.map(x => x.text))].map((x, idx) => `[ ] ${x}`).join('\n');
+  
+  // Dynamically build legally compliant official document checklist based on client profile flags
+  const checklistItems = [
+    "טופס 135 מלא ומקודד (דין וחשבון שנתי מקוצר לשכירים) עבור שנות המס הרלוונטיות.",
+    "טופס 106 מקורי ומלא מכל המעסיקים עבור אותן שנים.",
+    "אישור ניהול חשבון בנק או צילום צ'ק (חובה על פי חוק לצורך העברת הזיכוי ישירות לחשבון)."
+  ];
+  
+  if (d.employers === '2' || d.employers === '3+') {
+    checklistItems.push("אישור תיאום מס (אם בוצע במהלך השנה) או אסמכתאות על הפסקת עבודה / חל\"ת.");
+  }
+  if (Array.isArray(d.extraIncome) && d.extraIncome.includes('capital')) {
+    checklistItems.push("טופס 867 שנתי מרוכז מכל הבנקים או בתי ההשקעות (פירוט רווחים והפסדים מניירות ערך).");
+  }
+  if (d.donations && d.donations !== 'no') {
+    checklistItems.push("קבלות מקוריות על תרומות למוסדות מוכרים לפי סעיף 46 לפקודת מס הכנסה.");
+  }
+  if (d.soldierDischarge && d.soldierDischarge !== 'no') {
+    checklistItems.push("תעודת שחרור מצה\"ל / שירות לאומי לצורך חישוב נקודות זיכוי.");
+  }
+  if (d.degreeCompleted && d.degreeCompleted !== 'no') {
+    checklistItems.push("אישור זכאות לתואר אקדמי או תעודת מקצוע (טופס 219) לקבלת נקודת זיכוי.");
+  }
+  
+  const docsText = checklistItems.map((item, idx) => `${idx + 1}. ${item}`).join('\n');
 
   console.log('✉️ Attempting automatic send via EmailJS to:', emailTo, { name, taxYear: d.taxYear });
 
@@ -1941,23 +1965,18 @@ function sendEmailReport() {
 }
 
 function openMailtoFallback(emailTo, name, taxYear, r, reasonsText, docsText) {
-  const subject = encodeURIComponent(`EZ Tax - דו"ח זכאות להחזר מס לשנת ${taxYear}`);
+  const d = window.lastFormData;
+  const clientId = d ? `${d.phone ? d.phone.slice(-4) : ''}-${Date.now().toString().slice(-4)}` : Date.now().toString().slice(-6);
+  const subject = encodeURIComponent(`💰 תוצאות בדיקת הזכאות שלך + הטפסים המוכנים להגשה (תיק מס' ${clientId})`);
+  
   const bodyText = encodeURIComponent(
     `שלום ${name},\n\n` +
-    `להלן סיכום דו"ח בדיקת הזכאות להחזר מס לשנת ${taxYear} שביצעת באתר EZ Tax:\n\n` +
-    `--------------------------------------------------\n` +
-    `📊 ציון זכאות: ${r.eligibilityScore}/100\n` +
-    `💰 טווח החזר מס משוער: ₪${r.refundMin.toLocaleString('he-IL')} – ₪${r.refundMax.toLocaleString('he-IL')}\n` +
-    `📈 סבירות קבלת החזר: ${r.probability}\n` +
-    `--------------------------------------------------\n\n` +
-    `💡 סיבות הזכאות שזוהו:\n${reasonsText}\n\n` +
-    `📋 מסמכים שצריך לאסוף כדי לבקש את ההחזר:\n${docsText}\n\n` +
-    `📁 קבצים שהועלו:\n${uploadedFiles.length > 0 ? uploadedFiles.map(f => f.name).join('\n') : 'לא הועלו קבצים'}\n\n` +
-    `--------------------------------------------------\n` +
-    `מה עושים עכשיו?\n` +
-    `1. אוספים את המסמכים המופיעים ברשימה לעיל.\n` +
-    `2. יועץ מס מ-EZ Tax יצור איתך קשר בטלפון ${window.lastFormData.phone} או במייל ${window.lastFormData.email} בתוך 24 שעות כדי לסייע לך בהגשת הדוח לקבלת ההחזר מהמדינה.\n` +
-    `3. לשאלות נוספות, ניתן להשיב למייל זה או לכתוב לנו לכתובת: contact.ez.security@gmail.com\n\n` +
+    `אנו שמחים לעדכן כי בדיקת הזכאות שלך בפלטפורמת EZ-Tax הושלמה בהצלחה. על פי הנתונים שהזנת, סכום החזר המס המשוער שלך עבור שנות המס ${taxYear} עומד על כ-₪${r.refundMin.toLocaleString('he-IL')} – ₪${r.refundMax.toLocaleString('he-IL')}.\n\n` +
+    `בהתאם לסעיף 160 לפקודת מס הכנסה, כל אזרח זכאי לקבל החזר על מס ששולם ביתר בתוספת ריבית והפרשי הצמדה כחוק. כדי לפשט עבורך את התהליך, המערכת שלנו כבר הפיקה באופן אוטומטי את טופס 135 (הדו\"ח השנתי המקוצר לשכירים) עבור השנים הרלוונטיות, והוא מוכן לחתימתך.\n\n` +
+    `אנא היכנס לקישור המצורף על מנת לחתום דיגיטלית באופן מאובטח על הטפסים ולהשלים את ההגשה: https://ez-tax.co.il/signature?client_id=${clientId}\n\n` +
+    `לאחר חתימתך והעלאת המסמכים המלווים הנדרשים, התיק ייבדק על ידי נציג שירות מקצועי וישודר ישירות לרשות המסים. כספי ההחזר יועברו ישירות לחשבון הבנק שלך בתוך 30 עד 90 ימים ממועד קליטת התיק במשרדי שומה.\n\n` +
+    `לנוחיותך, להלן רשימת המסמכים שיש לצרף לתיק לצורך הגשתו:\n` +
+    `${docsText}\n\n` +
     `בברכה,\n` +
     `צוות EZ Tax`
   );

@@ -1,7 +1,7 @@
 /* =============================================
    TaxOS — Tax Calculation Engine + UI Logic
    ============================================= */
-console.log("🚀 EZ Tax — Code Version 2.2 Loaded — Diagnostics Active");
+console.log("🚀 EZ Tax — Code Version 2.3 Loaded — Diagnostics Active");
 
 // ─── הגדרות אישיות — שנה כאן בלבד! ─────────────────────────────
 const CONFIG = {

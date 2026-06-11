@@ -58,6 +58,25 @@ function runUnitTests() {
     failed++;
   }
 
+  // Test 4: Verify that docsHtml in app.js does not contain layout HTML tags (like <div> or <strong>)
+  try {
+    const appJs = fs.readFileSync(path.resolve(__dirname, '../app.js'), 'utf8');
+    const docsHtmlLine = appJs.match(/const docsHtml = [^;]*;/);
+    if (docsHtmlLine) {
+      const lineStr = docsHtmlLine[0];
+      if (lineStr.includes('div') || lineStr.includes('strong') || lineStr.includes('style=')) {
+        throw new Error(`docsHtml contains HTML layout tags which will escape! Found: ${lineStr}`);
+      }
+      console.log("✅ TEST 4: Verified docsHtml does not contain raw layout HTML tags.");
+      passed++;
+    } else {
+      throw new Error("Could not find docsHtml assignment in app.js.");
+    }
+  } catch (e) {
+    console.error(`❌ TEST 4: docsHtml tag check failed. Details: ${e.message}`);
+    failed++;
+  }
+
   console.log(`\n📊 Test Run Completed: ${passed} Passed, ${failed} Failed.`);
   process.exit(failed > 0 ? 1 : 0);
 }

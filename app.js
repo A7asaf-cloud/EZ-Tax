@@ -2003,7 +2003,7 @@ async function sendEmailReport() {
   const cleanFormUrl = `https://ez-tax-one.vercel.app/All%20Attachments/tax-form-135-${d.taxYear}.pdf`;
 
   const checklistItems = [
-    `טופס 135 הרשמי לשנת ${d.taxYear} — קישור להורדה ישירה:\n${cleanFormUrl}\n(נא למלא, לחתום ולהחזיר אלינו)`,
+    `<a href="${cleanFormUrl}" style="color:#2563eb;font-weight:bold;">טופס 135 הרשמי לשנת ${d.taxYear}</a> — נא למלא, לחתום ולהחזיר אלינו במייל חוזר או בוואטסאפ.`,
     "טופס 106 מקורי ומלא מכל המעסיקים עבור אותן שנים.",
     "אישור ניהול חשבון בנק או צילום צ'ק (חובה על פי חוק לצורך העברת הזיכוי ישירות לחשבון)."
   ];
@@ -2024,7 +2024,7 @@ async function sendEmailReport() {
     checklistItems.push("אישור זכאות לתואר אקדמי או תעודת מקצוע (טופס 219) לקבלת נקודת זיכוי.");
   }
 
-  const docsText = checklistItems.map((item, idx) => `${idx + 1}. ${item}`).join('\n');
+  const docsHtml = checklistItems.map((item, idx) => `<div style="margin:6px 0;">${idx + 1}. ${item}</div>`).join('');
 
   // 2. שלח ללקוח דרך EmailJS (אוטומטי, ללא חלוניות)
   if (CONFIG.emailjsServiceId && CONFIG.emailjsTemplateId && CONFIG.emailjsPublicKey && typeof emailjs !== 'undefined') {
@@ -2041,8 +2041,9 @@ async function sendEmailReport() {
       refund_max: r.refundMax.toLocaleString('he-IL'),
       probability: r.probability,
       reasons: reasonsText,
-      documents: docsText,
-      form_135_url: cleanFormUrl
+      documents: docsHtml,
+      form_135_url: cleanFormUrl,
+      form_135_link: `<a href="${cleanFormUrl}" style="color:#2563eb;font-weight:bold;">טופס 135 הרשמי לשנת ${d.taxYear}</a>`
     };
 
     emailjs.send(CONFIG.emailjsServiceId, CONFIG.emailjsTemplateId, emailParams)

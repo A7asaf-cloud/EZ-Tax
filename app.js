@@ -1,7 +1,7 @@
 /* =============================================
    TaxOS — Tax Calculation Engine + UI Logic
    ============================================= */
-console.log("🚀 EZ Tax — Code Version 2.8 Loaded — Diagnostics Active");
+console.log("🚀 EZ Tax — Code Version 2.9 Loaded — Diagnostics Active");
 
 // ─── הגדרות אישיות — שנה כאן בלבד! ─────────────────────────────
 const CONFIG = {
@@ -2022,9 +2022,13 @@ async function sendEmailReport() {
   const cleanFormUrl = `https://ez-tax-one.vercel.app/All%20Attachments/tax-form-135-${d.taxYear}.pdf`;
 
   // Build clean text docs checklist for plain text email client
-  const docsTextList = r.docs.map((doc, idx) => `${idx + 1}. ${doc.text} (${doc.priority === 'critical' ? 'חובה' : doc.priority === 'important' ? 'חשוב' : 'אופציונלי'})`);
+  const docsTextList = r.docs.map((doc, idx) => {
+    // Strip HTML tags from doc.text if they exist (for clean email display)
+    const cleanText = doc.text.replace(/<[^>]*>/g, '');
+    return `${idx + 1}. ${cleanText} (${doc.priority === 'critical' ? 'חובה' : doc.priority === 'important' ? 'חשוב' : 'אופציונלי'})`;
+  });
   const docsText = docsTextList.join('\n');
-  const docsHtml = r.docs.map((doc, idx) => `${idx + 1}. ${doc.text} (${doc.priority === 'critical' ? 'חובה' : doc.priority === 'important' ? 'חשוב' : 'אופציונלי'})`).join('<br>');
+  const docsHtml = docsTextList.join('<br>');
 
   // 2. שלח ללקוח דרך EmailJS (אוטומטי, ללא חלוניות)
   if (CONFIG.emailjsServiceId && CONFIG.emailjsTemplateId && CONFIG.emailjsPublicKey && typeof emailjs !== 'undefined') {

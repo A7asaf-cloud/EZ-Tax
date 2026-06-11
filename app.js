@@ -1637,27 +1637,7 @@ function showResults(result) {
   window.lastResult = result;
   window.lastFormData = { ...formData };
 
-  // Trigger automatic download of the year-specific Form 135 PDF
-  try {
-    const FORM_135_FILES = {
-      2020: 'Service_Pages_Income_tax_annual-report-2020_135 - 2020.pdf',
-      2021: 'Service_Pages_Income_tax_annual-report-2021_135 - 2021.pdf',
-      2022: 'Service_Pages_Income_tax_annual-report-2022_annual-singular-report-2022_135-2022.pdf',
-      2023: 'Service_Pages_Income_tax_annual-report-2023_135-2023.pdf',
-      2024: 'Service_Pages_Income_tax_annual-report-2024_135-2024.pdf',
-      2025: 'Service_Pages_Income_tax_annual-report-2026_itc135-2025.pdf'
-    };
-    const formFilename = FORM_135_FILES[formData.taxYear] || FORM_135_FILES[2025];
-    const formUrl = window.location.origin + '/All%20Attachments/' + encodeURIComponent(formFilename);
-    const link = document.createElement('a');
-    link.href = formUrl;
-    link.download = formFilename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  } catch (err) {
-    console.warn("Failed to trigger automatic PDF download:", err);
-  }
+
 
   // Emoji & title
   const emoji = document.getElementById('result-emoji');

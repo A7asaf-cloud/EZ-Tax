@@ -1,7 +1,7 @@
 /* =============================================
    TaxOS — Tax Calculation Engine + UI Logic
    ============================================= */
-console.log("🚀 EZ Tax — Code Version 2.9 Loaded — Diagnostics Active");
+console.log("🚀 EZ Tax — Code Version 3.0 Loaded — Diagnostics Active");
 
 // ─── הגדרות אישיות — שנה כאן בלבד! ─────────────────────────────
 const CONFIG = {
@@ -1482,7 +1482,7 @@ function runCalculation(data) {
   // ── STANDARD DOCS (always needed) ──
   const cleanFormUrl = `https://ez-tax-one.vercel.app/All%20Attachments/tax-form-135-${year}.pdf`;
   docs.push({ 
-    text: `טופס 135 הרשמי לשנת ${year} (להורדה ישירה: <a href="${cleanFormUrl}" target="_blank" style="color:#3b82f6;text-decoration:underline;font-weight:bold;">לחץ כאן להורדה</a>)`, 
+    text: `טופס 135 הרשמי לשנת ${year} (להורדה ישירה: ${cleanFormUrl})`, 
     priority: 'critical' 
   });
   docs.push({ text: 'טופס 106 מקורי ומלא מכל המעסיקים עבור אותן שנים', priority: 'critical' });
@@ -1747,9 +1747,19 @@ function showResults(result) {
     el.className = `doc-item ${doc.priority}`;
     const badgeText = { critical: 'חובה', important: 'חשוב', optional: 'אופציונלי' };
     const icons = { critical: '📄', important: '📋', optional: '📑' };
+
+    // Dynamically detect URLs and convert to styled links
+    let docTextHtml = doc.text;
+    const urlRegex = /(https?:\/\/[^\s\)]+)/g;
+    if (urlRegex.test(doc.text)) {
+      docTextHtml = doc.text.replace(urlRegex, (url) => {
+        return `<a href="${url}" target="_blank" style="color:#60a5fa; text-decoration:underline; font-weight:bold;">לחץ כאן להורדה</a>`;
+      });
+    }
+
     el.innerHTML = `
       <span>${icons[doc.priority] || '📄'}</span>
-      <span style="flex:1;">${doc.text}</span>
+      <span style="flex:1;">${docTextHtml}</span>
       <span class="doc-badge ${doc.priority}">${badgeText[doc.priority]}</span>
     `;
     docsList.appendChild(el);

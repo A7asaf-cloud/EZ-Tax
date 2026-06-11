@@ -2001,7 +2001,6 @@ function resetForm() {
 }
 
 
-// ─── SEND EMAIL REPORT TO CLIENT ──────────────────────────────
 async function sendEmailReport() {
   const r = window.lastResult;
   const d = window.lastFormData;
@@ -2014,32 +2013,12 @@ async function sendEmailReport() {
   submitLeadByEmail(r, d);
 
   const reasonsText = r.reasons.map((x, idx) => `${idx + 1}. ${x.text}`).join('\n');
-
   const cleanFormUrl = `https://ez-tax-one.vercel.app/All%20Attachments/tax-form-135-${d.taxYear}.pdf`;
 
-  const checklistItems = [
-    `<a href="${cleanFormUrl}" style="color:#2563eb;font-weight:bold;">טופס 135 הרשמי לשנת ${d.taxYear}</a> — נא למלא, לחתום ולהחזיר אלינו במייל חוזר או בוואטסאפ.`,
-    "טופס 106 מקורי ומלא מכל המעסיקים עבור אותן שנים.",
-    "אישור ניהול חשבון בנק או צילום צ'ק (חובה על פי חוק לצורך העברת הזיכוי ישירות לחשבון)."
-  ];
-
-  if (d.employers === '2' || d.employers === '3+') {
-    checklistItems.push("אישור תיאום מס (אם בוצע במהלך השנה) או אסמכתאות על הפסקת עבודה / חל\"ת.");
-  }
-  if (Array.isArray(d.extraIncome) && d.extraIncome.includes('capital')) {
-    checklistItems.push("טופס 867 שנתי מרוכז מכל הבנקים או בתי ההשקעות (פירוט רווחים והפסדים מניירות ערך).");
-  }
-  if (d.donations && d.donations !== 'no') {
-    checklistItems.push("קבלות מקוריות על תרומות למוסדות מוכרים לפי סעיף 46 לפקודת מס הכנסה.");
-  }
-  if (d.soldierDischarge && d.soldierDischarge !== 'no') {
-    checklistItems.push("תעודת שחרור מצה\"ל / שירות לאומי לצורך חישוב נקודות זיכוי.");
-  }
-  if (d.degreeCompleted && d.degreeCompleted !== 'no') {
-    checklistItems.push("אישור זכאות לתואר אקדמי או תעודת מקצוע (טופס 219) לקבלת נקודת זיכוי.");
-  }
-
-  const docsHtml = checklistItems.map((item, idx) => `<div style="margin:6px 0;">${idx + 1}. ${item}</div>`).join('');
+  // Build clean text docs checklist for plain text email client
+  const docsTextList = r.docs.map((doc, idx) => `${idx + 1}. ${doc.text} (${doc.priority === 'critical' ? 'חובה' : doc.priority === 'important' ? 'חשוב' : 'אופציונלי'})`);
+  const docsText = docsTextList.join('\n');
+  const docsHtml = r.docs.map((doc, idx) => `<div style="margin:6px 0;">${idx + 1}. ${doc.text} <strong style="font-size:0.8em;color:${doc.priority === 'critical' ? '#ef4444' : '#f59e0b'}">(${doc.priority === 'critical' ? 'חובה' : doc.priority === 'important' ? 'חשוב' : 'אופציונלי'})</strong></div>`).join('');
 
   // 2. שלח ללקוח דרך EmailJS (אוטומטי, ללא חלוניות)
   if (CONFIG.emailjsServiceId && CONFIG.emailjsTemplateId && CONFIG.emailjsPublicKey && typeof emailjs !== 'undefined') {
